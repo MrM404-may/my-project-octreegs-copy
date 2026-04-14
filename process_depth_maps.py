@@ -18,6 +18,8 @@ def load_inv_depth_map(inv_depth_path):
 def inv_depth_to_depth(inv_depth_map):
     # 避免除以零
     depth_map = 1.0 / (inv_depth_map + 1e-8)
+    # 限制深度范围，避免过大的值
+    depth_map = np.clip(depth_map, 0, 50.0)
     return depth_map
 
 # 像素坐标转相机坐标
