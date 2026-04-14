@@ -56,10 +56,12 @@ namespace FORWARD
 		const float2* points_xy_image,
 		const float* features,
 		const float4* conic_opacity,
+		const float* depths,
 		float* final_T,
 		uint32_t* n_contrib,
 		const float* bg_color,
-		float* out_color);
+		float* out_color,
+		float* out_inv_depth);
 	void filter_preprocess(int P, int M,
 		const float* means3D,
 		const glm::vec3* scales,
