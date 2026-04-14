@@ -20,6 +20,11 @@ def inv_depth_to_depth(inv_depth_map):
     depth_map = 1.0 / (inv_depth_map + 1e-8)
     # 限制深度范围，避免过大的值
     depth_map = np.clip(depth_map, 0, 50.0)
+    
+    # 野点过滤：使用中值滤波
+    from scipy.ndimage import median_filter
+    depth_map = median_filter(depth_map, size=3)
+    
     return depth_map
 
 # 像素坐标转相机坐标
@@ -113,10 +118,14 @@ def generate_2d_cost_map(depth_maps, cameras, grid_size=(100, 100), z_height=1.0
     if np.max(cost_map) > 0:
         cost_map = cost_map / np.max(cost_map)
     
+    # 平滑代价地图，减少野点
+    from scipy.ndimage import gaussian_filter
+    cost_map = gaussian_filter(cost_map, sigma=1)
+    
     return cost_map, (min_x, max_x, min_y, max_y)
 
 # 生成三维代价地图
-def generate_3d_cost_map(depth_maps, cameras, grid_size=(50, 50, 50)):
+def generate_3d_cost_map(depth_maps, cameras, grid_size=(30, 30, 30)):
     # 确定三维范围
     min_x, max_x = float('inf'), -float('inf')
     min_y, max_y = float('inf'), -float('inf')
@@ -189,6 +198,14 @@ def generate_3d_cost_map(depth_maps, cameras, grid_size=(50, 50, 50)):
                         cost_map[map_z, map_y, map_x] += 1.0
     
     # 归一化
+    if np.max(cost_map) > 0:
+        cost_map = cost_map / np.max(cost_map)
+    
+    # 平滑代价地图，减少野点
+    from scipy.ndimage import gaussian_filter
+    cost_map = gaussian_filter(cost_map, sigma=1)
+    
+    # 二次归一化
     if np.max(cost_map) > 0:
         cost_map = cost_map / np.max(cost_map)
     
