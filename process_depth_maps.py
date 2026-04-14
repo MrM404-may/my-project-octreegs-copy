@@ -224,26 +224,41 @@ def visualize_3d_cost_map(cost_map, bounds, save_path=None):
     points = []
     values = []
     
+    # 降低阈值，显示更多点
+    threshold = 0.05
     for i in range(grid_size[0]):
         for j in range(grid_size[1]):
             for k in range(grid_size[2]):
-                if cost_map[i, j, k] > 0.1:  # 只显示代价大于0.1的点
+                if cost_map[i, j, k] > threshold:  # 降低阈值
                     points.append([x[k], y[j], z[i]])
                     values.append(cost_map[i, j, k])
     
     points = np.array(points)
     values = np.array(values)
     
+    print(f"3D cost map points: {len(points)}")  # 打印点的数量
+    
+    if len(points) == 0:
+        print("No points to display! Try lowering the threshold.")
+        return
+    
     fig = plt.figure(figsize=(12, 10))
     ax = fig.add_subplot(111, projection='3d')
+    
+    # 使用较大的点大小
     scatter = ax.scatter(points[:, 0], points[:, 1], points[:, 2], 
-                        c=values, cmap='jet', alpha=0.5, s=10)
+                        c=values, cmap='jet', alpha=0.6, s=20)
     
     ax.set_xlabel('X (m)')
     ax.set_ylabel('Y (m)')
     ax.set_zlabel('Z (m)')
     ax.set_title('3D Cost Map')
     plt.colorbar(scatter, label='Cost')
+    
+    # 设置坐标轴范围
+    ax.set_xlim(min_x, max_x)
+    ax.set_ylim(min_y, max_y)
+    ax.set_zlim(min_z, max_z)
     
     if save_path:
         plt.savefig(save_path, dpi=150, bbox_inches='tight')
@@ -263,28 +278,32 @@ def main():
     # 读取相机参数
     print("Loading camera parameters...")
     cameras = load_camera_params(camera_json_path)
+    print(f"Loaded {len(cameras)} cameras")
     
     # 读取逆深度图
     print("Loading inverse depth maps...")
     inv_depth_files = sorted([f for f in os.listdir(inv_depth_dir) if f.endswith('.npy')])
-    depth_maps = []
+    print(f"Found {len(inv_depth_files)} depth maps")
     
-    for file in inv_depth_files:
+    depth_maps = []
+    valid_cameras = []
+    
+    # 只处理前N个深度图和对应的相机
+    max_depth_maps = min(len(inv_depth_files), len(cameras))
+    print(f"Processing {max_depth_maps} depth maps and cameras")
+    
+    for i in range(max_depth_maps):
+        file = inv_depth_files[i]
         inv_depth_path = os.path.join(inv_depth_dir, file)
         inv_depth_map = load_inv_depth_map(inv_depth_path)
         depth_map = inv_depth_to_depth(inv_depth_map)
         depth_maps.append(depth_map)
+        valid_cameras.append(cameras[i])
         print(f"Loaded {file}, shape: {depth_map.shape}")
-    
-    # 确保深度图数量与相机数量匹配
-    if len(depth_maps) != len(cameras):
-        print(f"Warning: Number of depth maps ({len(depth_maps)}) doesn't match number of cameras ({len(cameras)})")
-        # 只使用前N个相机，其中N是深度图数量
-        cameras = cameras[:len(depth_maps)]
     
     # 生成二维代价地图
     print("Generating 2D cost map...")
-    cost_map_2d, bounds_2d = generate_2d_cost_map(depth_maps, cameras)
+    cost_map_2d, bounds_2d = generate_2d_cost_map(depth_maps, valid_cameras)
     visualize_2d_cost_map(cost_map_2d, bounds_2d, 
                          save_path=os.path.join(output_dir, '2d_cost_map.png'))
     
@@ -296,7 +315,8 @@ def main():
     
     # 生成三维代价地图
     print("Generating 3D cost map...")
-    cost_map_3d, bounds_3d = generate_3d_cost_map(depth_maps, cameras)
+    # 减小网格大小以提高处理速度
+    cost_map_3d, bounds_3d = generate_3d_cost_map(depth_maps, valid_cameras, grid_size=(30, 30, 30))
     visualize_3d_cost_map(cost_map_3d, bounds_3d, 
                          save_path=os.path.join(output_dir, '3d_cost_map.png'))
     
