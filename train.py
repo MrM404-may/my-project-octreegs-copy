@@ -319,6 +319,11 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
     per_view_dict = {}
     for idx, view in enumerate(tqdm(views, desc="Rendering progress")):
         
+        # Ensure camera image is loaded on GPU
+        if hasattr(view, 'is_image_loaded') and not view.is_image_loaded():
+            if hasattr(view, 'reload_image'):
+                view.reload_image()
+        
         torch.cuda.synchronize();t_start = time.time()
         
         gaussians.set_anchor_mask(view.camera_center, iteration, view.resolution_scale)
