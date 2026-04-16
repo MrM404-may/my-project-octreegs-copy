@@ -37,12 +37,16 @@ class Camera(nn.Module):
             print(f"[Warning] Custom device {data_device} failed, fallback to default cuda device" )
             self.data_device = torch.device("cuda")
 
-        # Store image data for potential reloading
-        self._image_data = image
-        self._gt_alpha_mask = gt_alpha_mask
+        # Store image data on CPU to save GPU memory
+        self._image_data_cpu = image.cpu().clone()
+        self._gt_alpha_mask_cpu = gt_alpha_mask.cpu().clone() if gt_alpha_mask is not None else None
+        
+        # Store dimensions
+        self.image_width = self._image_data_cpu.shape[2]
+        self.image_height = self._image_data_cpu.shape[1]
 
-        # Initialize image
-        self._load_image()
+        # Initialize image on GPU
+        self._load_image_to_gpu()
 
         self.zfar = 100.0
         self.znear = 0.01
@@ -55,21 +59,31 @@ class Camera(nn.Module):
         self.full_proj_transform = (self.world_view_transform.unsqueeze(0).bmm(self.projection_matrix.unsqueeze(0))).squeeze(0)
         self.camera_center = self.world_view_transform.inverse()[3, :3]
 
-    def _load_image(self):
-        """Load the image from stored data"""
-        self.original_image = self._image_data.clamp(0.0, 1.0).to(self.data_device)
-        self.image_width = self.original_image.shape[2]
-        self.image_height = self.original_image.shape[1]
-
-        if self._gt_alpha_mask is not None:
-            self.original_image *= self._gt_alpha_mask.to(self.data_device)
+    def _load_image_to_gpu(self):
+        """Load image from CPU to GPU"""
+        self.original_image = self._image_data_cpu.clamp(0.0, 1.0).to(self.data_device)
+        
+        if self._gt_alpha_mask_cpu is not None:
+            self.original_image *= self._gt_alpha_mask_cpu.to(self.data_device)
         else:
             self.original_image *= torch.ones((1, self.image_height, self.image_width), device=self.data_device)
 
+    def release_image_from_gpu(self):
+        """Release GPU memory for this camera's image"""
+        if hasattr(self, 'original_image'):
+            del self.original_image
+            torch.cuda.empty_cache()
+            return True
+        return False
+
     def reload_image(self):
-        """Reload the image from stored data"""
-        self._load_image()
+        """Reload the image from CPU to GPU"""
+        self._load_image_to_gpu()
         return self.original_image
+    
+    def is_image_loaded(self):
+        """Check if image is loaded on GPU"""
+        return hasattr(self, 'original_image')
 
 class MiniCam:
     def __init__(self, width, height, fovy, fovx, znear, zfar, world_view_transform, full_proj_transform):

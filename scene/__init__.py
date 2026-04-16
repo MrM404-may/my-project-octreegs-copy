@@ -122,41 +122,41 @@ class Scene:
         return all_cams
 
     def releaseCameraMemory(self, camera_id):
-        """Release memory for a specific camera by ID"""
+        """Release GPU memory for a specific camera by ID"""
         # Release from train cameras
         for scale in self.resolution_scales:
             if scale in self.train_cameras:
                 for cam in self.train_cameras[scale]:
                     if cam.uid == camera_id:
-                        # Clear the original image to release memory
-                        if hasattr(cam, 'original_image'):
-                            del cam.original_image
-                            torch.cuda.empty_cache()
-                        return True
+                        if hasattr(cam, 'release_image_from_gpu'):
+                            cam.release_image_from_gpu()
+                            return True
         # Release from test cameras
         for scale in self.resolution_scales:
             if scale in self.test_cameras:
                 for cam in self.test_cameras[scale]:
                     if cam.uid == camera_id:
-                        # Clear the original image to release memory
-                        if hasattr(cam, 'original_image'):
-                            del cam.original_image
-                            torch.cuda.empty_cache()
-                        return True
+                        if hasattr(cam, 'release_image_from_gpu'):
+                            cam.release_image_from_gpu()
+                            return True
         return False
 
     def releaseAllTrainCamerasMemory(self):
-        """Release memory for all training cameras"""
+        """Release GPU memory for all training cameras"""
+        released_count = 0
         for scale in self.resolution_scales:
             if scale in self.train_cameras:
                 for cam in self.train_cameras[scale]:
-                    if hasattr(cam, 'original_image'):
-                        del cam.original_image
-                        torch.cuda.empty_cache()
-        return True
+                    if hasattr(cam, 'release_image_from_gpu'):
+                        if cam.release_image_from_gpu():
+                            released_count += 1
+        # Only clear cache once after all releases
+        if released_count > 0:
+            torch.cuda.empty_cache()
+        return released_count
 
     def reloadCameraImage(self, camera_id):
-        """Reload image for a specific camera by ID"""
+        """Reload image to GPU for a specific camera by ID"""
         # Reload from train cameras
         for scale in self.resolution_scales:
             if scale in self.train_cameras:
@@ -173,4 +173,26 @@ class Scene:
                         if hasattr(cam, 'reload_image'):
                             cam.reload_image()
                             return True
+        return False
+    
+    def ensureCameraLoaded(self, camera_id):
+        """Ensure a camera's image is loaded on GPU, loading it if necessary"""
+        # Check train cameras
+        for scale in self.resolution_scales:
+            if scale in self.train_cameras:
+                for cam in self.train_cameras[scale]:
+                    if cam.uid == camera_id:
+                        if hasattr(cam, 'is_image_loaded') and not cam.is_image_loaded():
+                            if hasattr(cam, 'reload_image'):
+                                cam.reload_image()
+                        return True
+        # Check test cameras
+        for scale in self.resolution_scales:
+            if scale in self.test_cameras:
+                for cam in self.test_cameras[scale]:
+                    if cam.uid == camera_id:
+                        if hasattr(cam, 'is_image_loaded') and not cam.is_image_loaded():
+                            if hasattr(cam, 'reload_image'):
+                                cam.reload_image()
+                        return True
         return False
