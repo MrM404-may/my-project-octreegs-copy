@@ -120,3 +120,57 @@ class Scene:
         for scale in self.resolution_scales:
             all_cams.extend(self.test_cameras[scale])
         return all_cams
+
+    def releaseCameraMemory(self, camera_id):
+        """Release memory for a specific camera by ID"""
+        # Release from train cameras
+        for scale in self.resolution_scales:
+            if scale in self.train_cameras:
+                for cam in self.train_cameras[scale]:
+                    if cam.uid == camera_id:
+                        # Clear the original image to release memory
+                        if hasattr(cam, 'original_image'):
+                            del cam.original_image
+                            torch.cuda.empty_cache()
+                        return True
+        # Release from test cameras
+        for scale in self.resolution_scales:
+            if scale in self.test_cameras:
+                for cam in self.test_cameras[scale]:
+                    if cam.uid == camera_id:
+                        # Clear the original image to release memory
+                        if hasattr(cam, 'original_image'):
+                            del cam.original_image
+                            torch.cuda.empty_cache()
+                        return True
+        return False
+
+    def releaseAllTrainCamerasMemory(self):
+        """Release memory for all training cameras"""
+        for scale in self.resolution_scales:
+            if scale in self.train_cameras:
+                for cam in self.train_cameras[scale]:
+                    if hasattr(cam, 'original_image'):
+                        del cam.original_image
+                        torch.cuda.empty_cache()
+        return True
+
+    def reloadCameraImage(self, camera_id):
+        """Reload image for a specific camera by ID"""
+        # Reload from train cameras
+        for scale in self.resolution_scales:
+            if scale in self.train_cameras:
+                for cam in self.train_cameras[scale]:
+                    if cam.uid == camera_id:
+                        if hasattr(cam, 'reload_image'):
+                            cam.reload_image()
+                            return True
+        # Reload from test cameras
+        for scale in self.resolution_scales:
+            if scale in self.test_cameras:
+                for cam in self.test_cameras[scale]:
+                    if cam.uid == camera_id:
+                        if hasattr(cam, 'reload_image'):
+                            cam.reload_image()
+                            return True
+        return False

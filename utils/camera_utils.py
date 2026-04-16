@@ -47,7 +47,10 @@ def loadCam(args, id, cam_info, resolution_scale):
     if resized_image_rgb.shape[1] == 4:
         loaded_mask = resized_image_rgb[3:4, ...]
 
-    return Camera(colmap_id=cam_info.uid, R=cam_info.R, T=cam_info.T, 
+    # Ensure cam_info has uid attribute
+    cam_uid = getattr(cam_info, 'uid', id)
+
+    return Camera(colmap_id=cam_uid, R=cam_info.R, T=cam_info.T, 
                   FoVx=cam_info.FovX, FoVy=cam_info.FovY, 
                   image=gt_image, gt_alpha_mask=loaded_mask,
                   image_name=cam_info.image_name, resolution_scale=resolution_scale, 
