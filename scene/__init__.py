@@ -196,3 +196,22 @@ class Scene:
                                 cam.reload_image()
                         return True
         return False
+
+    def reloadMultipleCameras(self, camera_ids):
+        """Reload images for multiple cameras by ID list"""
+        loaded_count = 0
+        for camera_id in camera_ids:
+            if self.reloadCameraImage(camera_id):
+                loaded_count += 1
+        return loaded_count
+
+    def releaseMultipleCameras(self, camera_ids):
+        """Release GPU memory for multiple cameras by ID list"""
+        released_count = 0
+        for camera_id in camera_ids:
+            if self.releaseCameraMemory(camera_id):
+                released_count += 1
+        # Only clear cache once after all releases
+        if released_count > 0:
+            torch.cuda.empty_cache()
+        return released_count
