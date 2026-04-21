@@ -60,8 +60,8 @@ def cameraList_from_camInfos(cam_infos, resolution_scale, args):
     camera_list = []
 
     for id, c in enumerate(cam_infos):
-        # Only load image for the first camera
-        load_image = (id == 0)
+        # 所有相机都不默认加载图像到GPU，需要时再加载
+        load_image = False
         camera_list.append(loadCam(args, id, c, resolution_scale, load_image=load_image))
 
     return camera_list
