@@ -448,10 +448,13 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
 
     # 2. 计算每个区域的迭代边界 + 【初始化本地迭代计数器】
     current_iter = 0
+    # 预计算区域切换点映射，用于快速查找
+    region_switch_points = {}
     for i, region in enumerate(REGIONS_CONFIG):
         start_iter = current_iter + 1
         end_iter = current_iter + region['iterations']
         REGION_ITER_BOUNDS.append((start_iter, end_iter))
+        region_switch_points[start_iter] = i  # 迭代数 -> 区域索引的映射
         REGION_LOCAL_ITERS[i] = 0  # 每个区域初始本地迭代数为0
         current_iter = end_iter
     TOTAL_TRAIN_ITER = current_iter
@@ -575,13 +578,13 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
 
         # ====================== 动态切换训练区域 (核心改造) ======================
         # 检查是否需要切换区域
-        for region_idx in range(num_regions):
-            start_iter, end_iter = REGION_ITER_BOUNDS[region_idx]
-            if iteration == start_iter and region_idx != current_region_idx:
+        if iteration in region_switch_points:
+            new_region_idx = region_switch_points[iteration]
+            if new_region_idx != current_region_idx:
                 prev_region_idx = current_region_idx
                 prev_region_config = REGIONS_CONFIG[prev_region_idx]
 
-                print({"Region": f"{prev_region_idx+1}→{current_region_idx+1}", "Status": "Switching"})
+                print({"Region": f"{prev_region_idx+1}→{new_region_idx+1}", "Status": "Switching"})
 
                 # 1. 为当前区域的所有高斯赋值region属性
                 gaussians.set_region(prev_region_idx)
@@ -600,7 +603,7 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
                 print(f"[Region Switch] 区域 {prev_region_idx+1} 相机内存释放完成")
         
                 # 2. 切换变量
-                current_region_idx = region_idx
+                current_region_idx = new_region_idx
                 current_region = REGIONS_CONFIG[current_region_idx]
                 current_polygon = Polygon(current_region['vertices'])
                 
@@ -625,7 +628,6 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
                 
                 progress_bar.set_description(f"Training [Region {current_region_idx+1}: {current_region['name']}]")
                 send_mail(f"switching from region {prev_region_idx} to {current_region_idx} at iteration {iteration}")
-                break
         # ===============================================================================
 
         # ====================== 【核心】本地迭代计数器自增 ======================
