@@ -1,7 +1,7 @@
 
 #
 # Copyright (C) 2023, Inria
-# GRAPHDECO research group, 
+# GRAPHDECO research group, https://team.inria.fr/graphdeco
 # All rights reserved.
 #
 # This software is free for non-commercial, research and evaluation use 
@@ -505,4 +505,697 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
     # 相机ID到相机对象的映射将在需要时动态构建
 
     # 5. 初始化第一个区域
-    current_region_id
+    current_region_idx = 0
+    current_region = REGIONS_CONFIG[current_region_idx]
+    current_camera_pool = REGION_CAMERA_POOLS[current_region_idx]
+    current_region_polygon = Polygon(current_region['vertices'])
+    REGION_LOCAL_ITERS[current_region_idx] = 0  # 初始化第一个区域的本地迭代
+    opt.iterations = TOTAL_TRAIN_ITER
+    
+    # 4. 初始化第一个区域
+    current_region_idx = 0
+    current_region = REGIONS_CONFIG[current_region_idx]
+    current_polygon = Polygon(current_region['vertices'])
+    REGION_LOCAL_ITERS[current_region_idx] = 0  # 确保第一个区域本地迭代为0
+    print(f"\n🔄 [Init] 激活第一个区域: {current_region['name']} ...")
+    gaussians.enter_region(current_polygon)
+    # gaussians.restore_initial_state()
+    gaussians.set_region(current_region_idx)  
+    
+    # 初始化批量加载相机相关变量
+    batch_size = 100
+    current_batch_idx = 0
+    camera_sequence = []
+    current_batch_cameras = []
+    
+    # 生成第一个随机训练序列
+    def generate_random_sequence(camera_pool):
+        """生成随机训练序列"""
+        # camera_pool现在是相机ID列表，直接打乱它
+        sequence = camera_pool.copy()
+        random.shuffle(sequence)
+        return sequence
+    
+    # 加载当前区域的相机池
+    current_camera_pool = REGION_CAMERA_POOLS[current_region_idx]
+    # 生成随机训练序列
+    camera_sequence = generate_random_sequence(current_camera_pool)
+    # 计算批次数
+    num_batches = (len(camera_sequence) + batch_size - 1) // batch_size
+    start_iter, end_iter = REGION_ITER_BOUNDS[current_region_idx]
+    print("region 1 start_iter, end_iter", start_iter, end_iter)
+    start_iter, end_iter = REGION_ITER_BOUNDS[current_region_idx+1]
+    print("region 2 start_iter, end_iter", start_iter, end_iter)
+    # ===============================================================================
+
+    # 初始化进度条，使用当前区域的迭代次数作为总长度
+    current_region_total_iters = current_region['iterations']
+    progress_bar = tqdm(total=current_region_total_iters, desc=f"Training [Region {current_region_idx+1}: {current_region['name']}]", leave=True)
+    progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "Batches": num_batches, "LocalIter": f"0/{current_region_total_iters}"})
+    scene.release_images()
+    torch.cuda.empty_cache()
+    current_batch_cameras_list = []
+    # 训练循环
+    for iteration in range(first_iter, TOTAL_TRAIN_ITER + 1):        
+        # network gui not available in octree-gs yet
+        if network_gui.conn == None:
+            network_gui.try_connect()
+        while network_gui.conn != None:
+            try:
+                net_image_bytes = None
+                custom_cam, do_training, pipe.compute_cov3D_python, keep_alive, scaling_modifer = network_gui.receive()
+                if custom_cam != None:
+                    net_image = render(custom_cam, gaussians, pipe, background, scaling_modifer)["render"]
+                    net_image_bytes = memoryview((torch.clamp(net_image, min=0, max=1.0) * 255).byte().permute(1, 2, 0).contiguous().cpu().numpy())
+                network_gui.send(net_image_bytes, dataset.source_path)
+                if do_training and ((iteration < int(opt.iterations)) or not keep_alive):
+                    break
+            except Exception as e:
+                network_gui.conn = None
+
+        # ====================== 动态切换训练区域 (核心改造) ======================
+        # 检查是否需要切换区域
+        for region_idx in range(num_regions):
+            start_iter, end_iter = REGION_ITER_BOUNDS[region_idx]
+            if iteration == start_iter and region_idx != current_region_idx:
+                prev_region_idx = current_region_idx
+                prev_region_config = REGIONS_CONFIG[prev_region_idx]
+
+                print({"Region": f"{prev_region_idx+1}→{current_region_idx+1}", "Status": "Switching"})
+
+                # 1. 为当前区域的所有高斯赋值region属性
+                gaussians.set_region(prev_region_idx)
+                
+                # 2. 存储当前区域训练好的锚点
+                gaussians.save_region_anchors(prev_region_idx, os.path.join(dataset.model_path, "region_anchors"))
+                
+                # 3. 退出当前区域
+                gaussians.clean_out_region(current_polygon, f"Region_{current_region_idx}")
+                gaussians.clean_in_region()
+                gaussians.exit_and_cleanup()
+        
+                # 2. 切换变量
+                current_region_idx = region_idx
+                current_region = REGIONS_CONFIG[current_region_idx]
+                current_polygon = Polygon(current_region['vertices'])
+                
+                # 3. 【核心】重置当前区域的本地迭代计数器
+                REGION_LOCAL_ITERS[current_region_idx] = 0
+                
+                # 4. 进入新区域
+                gaussians.enter_region(current_polygon)
+                gaussians.set_region(current_region_idx)        
+                
+                # 重置批量加载相机相关变量
+                current_batch_idx = 0
+                current_camera_pool = REGION_CAMERA_POOLS[current_region_idx]
+                camera_sequence = generate_random_sequence(current_camera_pool)
+                num_batches = (len(camera_sequence) + batch_size - 1) // batch_size
+                current_batch_cameras = []
+                current_batch_cameras_list = []
+
+                progress_bar.set_description(f"Training [Region {current_region_idx+1}: {current_region['name']}]")
+                progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "Batches": num_batches, "LocalIter": "0/{current_region['iterations']}", "Status": "Ready"})
+                
+                progress_bar.set_description(f"Training [Region {current_region_idx+1}: {current_region['name']}]")
+                send_mail(f"switching from region {prev_region_idx} to {current_region_idx} at iteration {iteration}")
+                break
+        # ===============================================================================
+
+        # ====================== 【核心】本地迭代计数器自增 ======================
+        REGION_LOCAL_ITERS[current_region_idx] += 1
+        current_local_iter = REGION_LOCAL_ITERS[current_region_idx]  # 获取当前区域的本地步数
+        current_region_total_iters = current_region['iterations']    # 获取当前区域的总步数
+        # ===========================================================================
+
+        # ====================== 批量加载相机逻辑 ======================
+        # 检查是否需要加载新批次
+        if not current_batch_cameras_list:
+            if current_batch_idx < num_batches:
+                # 当批次用完时释放内存
+                scene.release_images()
+                torch.cuda.empty_cache()
+                # 加载下一个批次
+                start_idx = current_batch_idx * batch_size
+                end_idx = min(start_idx + batch_size, len(camera_sequence))
+                current_batch_cameras = camera_sequence[start_idx:end_idx]
+
+                progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "Batches": num_batches, "LocalIter": f"{current_local_iter}/{current_region['iterations']}", "Status": f"LoadBatch {current_batch_idx+1}/{num_batches}"})
+                # 根据相机ID加载相机
+                current_batch_cameras_list = scene.load_cameras_by_ids(current_batch_cameras)
+                current_batch_idx += 1
+            else:
+                # 当批次用完时释放内存
+                scene.release_images()
+                torch.cuda.empty_cache()
+                # 所有批次加载完毕，生成新的随机序列
+                camera_sequence = generate_random_sequence(current_camera_pool)
+                current_batch_idx = 0
+                num_batches = (len(camera_sequence) + batch_size - 1) // batch_size
+                # 加载第一个批次
+                start_idx = current_batch_idx * batch_size
+                end_idx = min(start_idx + batch_size, len(camera_sequence))
+                current_batch_cameras = camera_sequence[start_idx:end_idx]
+                progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "Batches": num_batches, "LocalIter": f"{current_local_iter}/{current_region['iterations']}", "Status": f"LoadBatch {current_batch_idx+1}/{num_batches}"})
+                # 根据相机ID加载相机
+                current_batch_cameras_list = scene.load_cameras_by_ids(current_batch_cameras)
+                current_batch_idx += 1
+        # ===========================================================================
+
+        iter_start.record()
+
+        gaussians.update_learning_rate(current_local_iter) # 注意：学习率通常还是随全局迭代衰减，这里保持不变
+
+        if dataset.random_background:
+            bg_color = [np.random.random(),np.random.random(),np.random.random()] 
+        elif dataset.white_background:
+            bg_color = [1.0, 1.0, 1.0]
+        else:
+            bg_color = [0.0, 0.0, 0.0]
+        background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
+        
+  
+ 
+        # 随机选择当前批次中的一个相机ID
+        # 直接从当前批次加载的相机中随机选择一个
+
+        viewpoint_cam = current_batch_cameras_list.pop()
+        
+        # Render
+        if (iteration - 1) == debug_from:
+            pipe.debug = True
+        
+        # 注意：set_anchor_mask 里的 iteration 通常用于控制 LOD  progressive，建议保留全局 iteration
+        gaussians.set_anchor_mask(viewpoint_cam.camera_center, current_local_iter, viewpoint_cam.resolution_scale)
+        voxel_visible_mask = prefilter_voxel(viewpoint_cam, gaussians, pipe, background)
+        
+        # 【注意】retain_grad 控制是否需要回传梯度来 densify，这里改为基于本地迭代判断
+        # retain_grad = (iteration < opt.update_until and iteration >= 0) 
+        # 改为：
+        retain_grad = (current_local_iter < opt.update_until and current_local_iter >= 0)
+        
+        # 传递当前区域索引作为camera_region参数
+        render_pkg = render(viewpoint_cam, gaussians, pipe, background, visible_mask=voxel_visible_mask, retain_grad=retain_grad, camera_region=current_region_idx)
+        
+        image, viewspace_point_tensor, visibility_filter, offset_selection_mask, radii, scaling, opacity = render_pkg["render"], render_pkg["viewspace_points"], render_pkg["visibility_filter"], render_pkg["selection_mask"], render_pkg["radii"], render_pkg["scaling"], render_pkg["neural_opacity"]
+
+        gt_image = viewpoint_cam.original_image.cuda()
+        Ll1 = l1_loss(image, gt_image)
+        
+        ssim_loss = (1.0 - ssim(image, gt_image))
+        if scaling.shape[0] > 0:
+            scaling_reg = scaling.prod(dim=1).mean()
+        else:
+            scaling_reg = torch.tensor(0.0, device="cuda")
+        loss = (1.0 - opt.lambda_dssim) * Ll1 + opt.lambda_dssim * ssim_loss + 0.01*scaling_reg
+
+        loss.backward()
+        # 监控MLP梯度
+        # monitor_mlp_gradients(gaussians, current_region_idx, iteration)
+        iter_end.record()
+
+        with torch.no_grad():
+            # Progress bar
+            ema_loss_for_log = 0.4 * loss.item() + 0.6 * ema_loss_for_log
+
+            if iteration % 1000 == 0:
+                # 【修改】进度条增加本地迭代显示
+                progress_bar.set_postfix({
+                    "Loss": f"{ema_loss_for_log:.{7}f}",
+                    "Region": f"{current_region_idx+1}({current_region['name']})",
+                    "LocalIter": f"{current_local_iter}/{current_region_total_iters}"
+                })
+                progress_bar.update(1000)
+            if iteration == TOTAL_TRAIN_ITER:
+                # 存储最后一个区域的训练好的锚点
+                gaussians.set_region(current_region_idx)
+                gaussians.save_region_anchors(current_region_idx, os.path.join(dataset.model_path, "region_anchors"))
+                progress_bar.close()
+
+            # Log and save
+            training_report(tb_writer, dataset_name, iteration, Ll1, loss, l1_loss, iter_start.elapsed_time(iter_end), testing_iterations, scene, render, (pipe, background), wandb, logger)
+            
+            
+            # ====================== 【核心】密度优化逻辑：全部替换为本地迭代 ======================
+            # if iteration < opt.update_until and iteration > opt.start_stat:
+            # 改为：
+            if current_local_iter < opt.update_until and current_local_iter > opt.start_stat:
+                # add statis
+                gaussians.training_statis(viewspace_point_tensor, opacity, visibility_filter, offset_selection_mask, voxel_visible_mask)
+                
+                # densification: 基于本地迭代
+                # if opt.update_anchor and iteration > opt.update_from and iteration % opt.update_interval == 0:
+                # 改为：
+                if opt.update_anchor and current_local_iter > opt.update_from and current_local_iter % opt.update_interval == 0:
+                    gaussians.adjust_anchor(
+                        iteration=current_local_iter, # 传入本地迭代，虽然内部可能没用来做判断，但传进去更保险
+                        check_interval=opt.update_interval, 
+                        success_threshold=opt.success_threshold,
+                        grad_threshold=opt.densify_grad_threshold, 
+                        update_ratio=dataset.update_ratio,
+                        extra_ratio=dataset.extra_ratio,
+                        extra_up=dataset.extra_up,
+                        min_opacity=opt.min_opacity
+                    )
+            # elif iteration == opt.update_until:
+            # 改为：
+            elif current_local_iter == opt.update_until:
+                del gaussians.opacity_accum
+                del gaussians.offset_gradient_accum
+                del gaussians.offset_denom
+                torch.cuda.empty_cache()
+            # =====================================================================================
+                    
+            # Optimizer step
+            if iteration < TOTAL_TRAIN_ITER:
+                gaussians.optimizer.step()
+                gaussians.optimizer.zero_grad(set_to_none = True)
+            
+            # 更新进度条
+            current_region_total_iters = current_region['iterations']
+            progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "Batches": num_batches, "LocalIter": f"{current_local_iter}/{current_region_total_iters}", "Loss": f"{loss.item():.7f}"})
+            # 确保进度条的当前值不超过总迭代次数
+            if current_local_iter <= current_region_total_iters:
+                progress_bar.n = current_local_iter
+                progress_bar.refresh()
+            
+            if (iteration in checkpoint_iterations):
+                logger.info("\n[ITER {}] Saving Checkpoint".format(iteration))
+                torch.save((gaussians.capture(), iteration), scene.model_path + "/chkpnt" + str(iteration) + ".pth")
+            # if (iteration in saving_iterations):
+            #     logger.info("\n[ITER {}] Saving Gaussians".format(iteration))
+            #     # 为当前区域的所有高斯赋值region属性
+            #     gaussians.set_region(current_region_idx)
+            #     scene.save(iteration)
+            if (iteration in saving_iterations):
+                logger.info("\n[ITER {}] Saving Gaussians".format(iteration))
+                gaussians.set_region(current_region_idx)
+                scene.save(iteration)
+    send_mail(f"The training process has completed after {TOTAL_TRAIN_ITER} iterations.")
+
+def prepare_output_and_logger(args):    
+    if not args.model_path:
+        if os.getenv('OAR_JOB_ID'):
+            unique_str=os.getenv('OAR_JOB_ID')
+        else:
+            unique_str = str(uuid.uuid4())
+        args.model_path = os.path.join("./output/", unique_str[0:10])
+        
+    # Set up output folder
+    print("Output folder: {}".format(args.model_path))
+    os.makedirs(args.model_path, exist_ok = True)
+    with open(os.path.join(args.model_path, "cfg_args"), 'w') as cfg_log_f:
+        cfg_log_f.write(str(Namespace(**vars(args))))
+
+    # Create Tensorboard writer
+    tb_writer = None
+    if TENSORBOARD_FOUND:
+        tb_writer = SummaryWriter(args.model_path)
+    else:
+        print("Tensorboard not available: not logging progress")
+    return tb_writer
+
+def training_report(tb_writer, dataset_name, iteration, Ll1, loss, l1_loss, elapsed, testing_iterations, scene : Scene, renderFunc, renderArgs, wandb=None, logger=None):
+    if tb_writer:
+        tb_writer.add_scalar(f'{dataset_name}/train_loss_patches/l1_loss', Ll1.item(), iteration)
+        tb_writer.add_scalar(f'{dataset_name}/train_loss_patches/total_loss', loss.item(), iteration)
+        tb_writer.add_scalar(f'{dataset_name}/iter_time', elapsed, iteration)
+
+
+    if wandb is not None:
+        wandb.log({"train_l1_loss":Ll1, 'train_total_loss':loss, })
+    
+    # Report test and samples of training set
+    if iteration in testing_iterations:
+        scene.gaussians.eval()
+        torch.cuda.empty_cache()
+        
+        validation_configs = ({'name': 'test', 'cameras' : scene.getTestCameras()}, 
+                                  {'name': 'train', 'cameras' : [scene.getTrainCameras()[idx % len(scene.getTrainCameras())] for idx in range(5, 30, 5)]})
+
+        for config in validation_configs:
+            if config['cameras'] and len(config['cameras']) > 0:
+                l1_test = 0.0
+                psnr_test = 0.0
+                
+                if wandb is not None:
+                    gt_image_list = []
+                    render_image_list = []
+                    errormap_list = []
+
+                for idx, viewpoint in enumerate(config['cameras']):
+                    scene.gaussians.set_anchor_mask(viewpoint.camera_center, iteration, viewpoint.resolution_scale)
+                    voxel_visible_mask = prefilter_voxel(viewpoint, scene.gaussians, *renderArgs)
+                    image = torch.clamp(renderFunc(viewpoint, scene.gaussians, *renderArgs, visible_mask=voxel_visible_mask)["render"], 0.0, 1.0)
+                    gt_image = torch.clamp(viewpoint.original_image.to("cuda"), 0.0, 1.0)
+                    if tb_writer and (idx < 30):
+                        tb_writer.add_images(f'{dataset_name}/'+config['name'] + "_view_{}/render".format(viewpoint.image_name), image[None], global_step=iteration)
+                        tb_writer.add_images(f'{dataset_name}/'+config['name'] + "_view_{}/errormap".format(viewpoint.image_name), (gt_image[None]-image[None]).abs(), global_step=iteration)
+
+                        if wandb:
+                            render_image_list.append(image[None])
+                            errormap_list.append((gt_image[None]-image[None]).abs())
+                            
+                        if iteration == testing_iterations[0]:
+                            tb_writer.add_images(f'{dataset_name}/'+config['name'] + "_view_{}/ground_truth".format(viewpoint.image_name), gt_image[None], global_step=iteration)
+                            if wandb:
+                                gt_image_list.append(gt_image[None])
+
+                    l1_test += l1_loss(image, gt_image).mean().double()
+                    psnr_test += psnr(image, gt_image).mean().double()
+
+                
+                
+                psnr_test /= len(config['cameras'])
+                l1_test /= len(config['cameras'])          
+                logger.info("\n[ITER {}] Evaluating {}: L1 {} PSNR {}".format(iteration, config['name'], l1_test, psnr_test))
+
+                
+                if tb_writer:
+                    tb_writer.add_scalar(f'{dataset_name}/'+config['name'] + '/loss_viewpoint - l1_loss', l1_test, iteration)
+                    tb_writer.add_scalar(f'{dataset_name}/'+config['name'] + '/loss_viewpoint - psnr', psnr_test, iteration)
+                if wandb is not None:
+                    wandb.log({f"{config['name']}_loss_viewpoint_l1_loss":l1_test, f"{config['name']}_PSNR":psnr_test})
+
+        if tb_writer:
+            # tb_writer.add_histogram(f'{dataset_name}/'+"scene/opacity_histogram", scene.gaussians.get_opacity, iteration)
+            tb_writer.add_scalar(f'{dataset_name}/'+'total_points', scene.gaussians.get_anchor.shape[0], iteration)
+        torch.cuda.empty_cache()
+
+        scene.gaussians.train()
+
+def render_set(model_path, name, iteration, views, gaussians, pipeline, background):
+    render_path = os.path.join(model_path, name, "ours_{}".format(iteration), "renders")
+    error_path = os.path.join(model_path, name, "ours_{}".format(iteration), "errors")
+    gts_path = os.path.join(model_path, name, "ours_{}".format(iteration), "gt")
+    makedirs(render_path, exist_ok=True)
+    makedirs(error_path, exist_ok=True)
+    makedirs(gts_path, exist_ok=True)
+    
+    t_list = []
+    visible_count_list = []
+    per_view_dict = {}
+    for idx, view in enumerate(tqdm(views, desc="Rendering progress")):
+        
+        torch.cuda.synchronize();t_start = time.time()
+        
+        gaussians.set_anchor_mask(view.camera_center, iteration, view.resolution_scale)
+        voxel_visible_mask = prefilter_voxel(view, gaussians, pipeline, background)
+        render_pkg = render(view, gaussians, pipeline, background, visible_mask=voxel_visible_mask)
+        torch.cuda.synchronize();t_end = time.time()
+
+        t_list.append(t_end - t_start)
+
+        # renders
+        rendering = torch.clamp(render_pkg["render"], 0.0, 1.0)
+        visible_count = render_pkg["visibility_filter"].sum()
+        visible_count_list.append(visible_count)
+
+        # gts
+        gt = view.original_image[0:3, :, :]
+        
+        # error maps
+        if gt.device != rendering.device:
+            rendering = rendering.to(gt.device)
+        errormap = (rendering - gt).abs()
+
+        torchvision.utils.save_image(rendering, os.path.join(render_path, '{0:05d}'.format(idx) + ".png"))
+        torchvision.utils.save_image(errormap, os.path.join(error_path, '{0:05d}'.format(idx) + ".png"))
+        torchvision.utils.save_image(gt, os.path.join(gts_path, '{0:05d}'.format(idx) + ".png"))
+        per_view_dict['{0:05d}'.format(idx) + ".png"] = visible_count.item()
+        
+    with open(os.path.join(model_path, name, "ours_{}".format(iteration), "per_view_count.json"), 'w') as fp:
+            json.dump(per_view_dict, fp, indent=True)
+    
+    return t_list, visible_count_list
+
+def render_sets(dataset : ModelParams, iteration : int, pipeline : PipelineParams, skip_train=False, skip_test=False, wandb=None, tb_writer=None, dataset_name=None, logger=None):
+    with torch.no_grad():
+        gaussians = GaussianModel(
+            dataset.feat_dim, dataset.n_offsets, dataset.fork, dataset.use_feat_bank, dataset.appearance_dim, 
+            dataset.add_opacity_dist, dataset.add_cov_dist, dataset.add_color_dist, dataset.add_level, 
+            dataset.visible_threshold, dataset.dist2level, dataset.base_layer, dataset.progressive, dataset.extend
+        )
+        scene = Scene(dataset, gaussians, load_iteration=iteration, shuffle=False, resolution_scales=dataset.resolution_scales, batch_size=100, logger=logger)
+        gaussians.eval()
+
+        if dataset.random_background:
+            bg_color = [np.random.random(),np.random.random(),np.random.random()] 
+        elif dataset.white_background:
+            bg_color = [1.0, 1.0, 1.0]
+        else:
+            bg_color = [0.0, 0.0, 0.0]
+        background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
+        if not os.path.exists(dataset.model_path):
+            os.makedirs(dataset.model_path)
+
+        if not skip_train:
+            # 使用批量加载模式，每次只渲染一个批次的相机
+            num_batches = scene.get_num_batches()
+            total_visible_count = 0
+            total_time = 0
+            
+            for batch_idx in range(num_batches):
+                batch_cameras = scene.getTrainCameras(batch_idx)
+                if not batch_cameras:
+                    continue
+                
+                t_batch_list, batch_visible_count = render_set(dataset.model_path, "train", scene.loaded_iter, batch_cameras, gaussians, pipeline, background)
+                total_visible_count += sum(batch_visible_count)
+                total_time += sum(t_batch_list)
+                
+                # 释放内存
+                del batch_cameras
+                torch.cuda.empty_cache()
+            
+            if total_time > 0:
+                train_fps = len(scene.getTrainCameras()) / total_time
+                logger.info(f'Train FPS: \033[1;35m{train_fps:.5f}\033[0m')
+                if wandb is not None:
+                    wandb.log({"train_fps":train_fps, })
+            visible_count = total_visible_count
+
+        if not skip_test:
+            # 渲染测试相机（如果有的话）
+            test_cameras = scene.getTestCameras()
+            if test_cameras:
+                t_test_list, visible_count = render_set(dataset.model_path, "test", scene.loaded_iter, test_cameras, gaussians, pipeline, background)
+                test_fps = 1.0 / torch.tensor(t_test_list[5:]).mean()
+                logger.info(f'Test FPS: \033[1;35m{test_fps.item():.5f}\033[0m')
+                if tb_writer:
+                    tb_writer.add_scalar(f'{dataset_name}/test_FPS', test_fps.item(), 0)
+                if wandb is not None:
+                    wandb.log({"test_fps":test_fps, })
+    
+    return visible_count
+
+
+def readImages(renders_dir, gt_dir):
+    renders = []
+    gts = []
+    image_names = []
+    for fname in os.listdir(renders_dir):
+        render = Image.open(renders_dir / fname)
+        gt = Image.open(gt_dir / fname)
+        renders.append(tf.to_tensor(render).unsqueeze(0)[:, :3, :, :].cuda())
+        gts.append(tf.to_tensor(gt).unsqueeze(0)[:, :3, :, :].cuda())
+        image_names.append(fname)
+    return renders, gts, image_names
+
+
+def evaluate(model_paths, eval_name, visible_count=None, wandb=None, tb_writer=None, dataset_name=None, logger=None):
+
+    full_dict = {}
+    per_view_dict = {}
+    full_dict_polytopeonly = {}
+    per_view_dict_polytopeonly = {}
+    print("")
+    
+    scene_dir = model_paths
+    full_dict[scene_dir] = {}
+    per_view_dict[scene_dir] = {}
+    full_dict_polytopeonly[scene_dir] = {}
+    per_view_dict_polytopeonly[scene_dir] = {}
+
+    test_dir = Path(scene_dir) / eval_name
+
+    for method in os.listdir(test_dir):
+
+        full_dict[scene_dir][method] = {}
+        per_view_dict[scene_dir][method] = {}
+        full_dict_polytopeonly[scene_dir][method] = {}
+        per_view_dict_polytopeonly[scene_dir][method] = {}
+
+        method_dir = test_dir / method
+        gt_dir = method_dir/ "gt"
+        renders_dir = method_dir / "renders"
+        renders, gts, image_names = readImages(renders_dir, gt_dir)
+
+        ssims = []
+        psnrs = []
+        lpipss = []
+
+        for idx in tqdm(range(len(renders)), desc="Metric evaluation progress"):
+            ssims.append(ssim(renders[idx], gts[idx]))
+            psnrs.append(psnr(renders[idx], gts[idx]))
+            lpipss.append(lpips_fn(renders[idx], gts[idx]).detach())
+        
+        if wandb is not None:
+            wandb.log({"test_SSIMS":torch.stack(ssims).mean().item(), })
+            wandb.log({"test_PSNR_final":torch.stack(psnrs).mean().item(), })
+            wandb.log({"test_LPIPS":torch.stack(lpipss).mean().item(), })
+
+        logger.info(f"model_paths: \033[1;35m{model_paths}\033[0m")
+        logger.info("  SSIM : \033[1;35m{:>12.7f}\033[0m".format(torch.tensor(ssims).mean(), ".5"))
+        logger.info("  PSNR : \033[1;35m{:>12.7f}\033[0m".format(torch.tensor(psnrs).mean(), ".5"))
+        logger.info("  LPIPS: \033[1;35m{:>12.7f}\033[0m".format(torch.tensor(lpipss).mean(), ".5"))
+        print("")
+
+
+        if tb_writer:
+            tb_writer.add_scalar(f'{dataset_name}/SSIM', torch.tensor(ssims).mean().item(), 0)
+            tb_writer.add_scalar(f'{dataset_name}/PSNR', torch.tensor(psnrs).mean().item(), 0)
+            tb_writer.add_scalar(f'{dataset_name}/LPIPS', torch.tensor(lpipss).mean().item(), 0)
+            
+            tb_writer.add_scalar(f'{dataset_name}/VISIBLE_NUMS', torch.tensor(visible_count).mean().item(), 0)
+        
+        full_dict[scene_dir][method].update({"SSIM": torch.tensor(ssims).mean().item(),
+                                                "PSNR": torch.tensor(psnrs).mean().item(),
+                                                "LPIPS": torch.tensor(lpipss).mean().item()})
+        per_view_dict[scene_dir][method].update({"SSIM": {name: ssim for ssim, name in zip(torch.tensor(ssims).tolist(), image_names)},
+                                                    "PSNR": {name: psnr for psnr, name in zip(torch.tensor(psnrs).tolist(), image_names)},
+                                                    "LPIPS": {name: lp for lp, name in zip(torch.tensor(lpipss).tolist(), image_names)},
+                                                    "VISIBLE_COUNT": {name: vc for vc, name in zip(torch.tensor(visible_count).tolist(), image_names)}})
+
+    with open(scene_dir + "/results.json", 'w') as fp:
+        json.dump(full_dict[scene_dir], fp, indent=True)
+    with open(scene_dir + "/per_view.json", 'w') as fp:
+        json.dump(per_view_dict[scene_dir], fp, indent=True)
+    
+def get_logger(path):
+    import logging
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO) 
+    fileinfo = logging.FileHandler(os.path.join(path, "outputs.log"))
+    fileinfo.setLevel(logging.INFO) 
+    controlshow = logging.StreamHandler()
+    controlshow.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s: %(message)s")
+    fileinfo.setFormatter(formatter)
+    controlshow.setFormatter(formatter)
+
+    logger.addHandler(fileinfo)
+    logger.addHandler(controlshow)
+
+    return logger
+
+if __name__ == "__main__":
+    # Set up command line argument parser
+    
+    parser = ArgumentParser(description="Training script parameters")
+    lp = ModelParams(parser)
+    op = OptimizationParams(parser)
+    pp = PipelineParams(parser)
+    parser.add_argument('--ip', type=str, default="127.0.0.1")
+    parser.add_argument('--port', type=int, default=6009)
+    parser.add_argument('--debug_from', type=int, default=-1)
+    parser.add_argument('--detect_anomaly', action='store_true', default=False)
+    parser.add_argument('--warmup', action='store_true', default=False)
+    parser.add_argument('--use_wandb', action='store_true', default=False)
+    parser.add_argument("--test_iterations", nargs="+", type=int, default=[i * 30000000 for i in range(1, 32 + 1)])
+    parser.add_argument("--save_iterations", nargs="+", type=int, default=[i * 50000 for i in range(1, 14 + 1)])
+    parser.add_argument("--quiet", action="store_true")
+    parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[])
+    parser.add_argument("--start_checkpoint", type=str, default = None)
+    parser.add_argument("--gpu", type=str, default = '-1')
+    args = parser.parse_args(sys.argv[1:])
+    send_mail(f"begin training {args.model_path}.")
+    # enable logging
+    model_path = args.model_path
+    os.makedirs(model_path, exist_ok=True)
+
+    logger = get_logger(model_path)
+
+    logger.info(f'args: {args}')
+
+    # if args.test_iterations[0] == -1:
+    #     args.test_iterations = [i for i in range(10000, args.iterations + 1, 10000)]
+    # if len(args.test_iterations) == 0 or args.test_iterations[-1] != args.iterations:
+    #     args.test_iterations.append(args.iterations)
+    # print(args.test_iterations)
+
+    # if args.save_iterations[0] == -1:
+    #     args.save_iterations = [i for i in range(10000, args.iterations + 1, 10000)]
+    # if len(args.save_iterations) == 0 or args.save_iterations[-1] != args.iterations:
+    #     args.save_iterations.append(args.iterations)
+    # print(args.save_iterations)
+
+    if args.gpu != '-1':
+        os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
+        os.system("echo $CUDA_VISIBLE_DEVICES")
+        logger.info(f'using GPU {args.gpu}')
+
+    try:
+        saveRuntimeCode(os.path.join(args.model_path, 'backup'))
+    except:
+        logger.info(f'save code failed~')
+        
+    dataset = args.source_path.split('/')[-1]
+    exp_name = args.model_path.split('/')[-2]
+    
+    if args.use_wandb:
+        wandb.login()
+        run = wandb.init(
+            # Set the project where this run will be logged
+            project=f"Octree-GS-{dataset}",
+            name=exp_name,
+            # Track hyperparameters and run metadata
+            settings=wandb.Settings(start_method="fork"),
+            config=vars(args)
+        )
+    else:
+        wandb = None
+    
+    logger.info("Optimizing " + args.model_path)
+
+    # Initialize system state (RNG)
+    safe_state(args.quiet)
+
+    # Start GUI server, configure and run training
+    network_gui.init(args.ip, args.port)
+    torch.autograd.set_detect_anomaly(args.detect_anomaly)
+    
+    # training
+    training(lp.extract(args), op.extract(args), pp.extract(args), dataset,  args.test_iterations, args.save_iterations, args.checkpoint_iterations, args.start_checkpoint, args.debug_from, wandb, logger)
+    if args.warmup:
+        logger.info("\n Warmup finished! Reboot from last checkpoints")
+        new_ply_path = os.path.join(args.model_path, f'point_cloud/iteration_{args.iterations}', 'point_cloud.ply')
+        training(lp.extract(args), op.extract(args), pp.extract(args), dataset,  args.test_iterations, args.save_iterations, args.checkpoint_iterations, args.start_checkpoint, args.debug_from, wandb=wandb, logger=logger, ply_path=new_ply_path)
+
+    # All done
+    logger.info("\nTraining complete.")
+
+    # 拼接所有区域的锚点文件
+    logger.info("\n🔗 拼接所有区域的锚点文件...")
+    merge_region_anchors(args.model_path)
+
+    # 保存MLP为PT文件
+    logger.info("\n💾 保存MLP为PT文件...")
+    # 这里需要加载训练好的MLP参数并保存为PT文件
+    # 例如，可以使用torch.save保存模型的状态字典
+    # 具体实现需要根据模型的结构来确定
+
+    # rendering
+    logger.info(f'\nStarting Rendering~')
+    if args.eval:
+        visible_count = render_sets(lp.extract(args), -1, pp.extract(args), skip_train=True, skip_test=False, wandb=wandb, logger=logger)
+    else:
+        visible_count = render_sets(lp.extract(args), -1, pp.extract(args), skip_train=False, skip_test=True, wandb=wandb, logger=logger)
+    logger.info("\nRendering complete.")
+
+    # calc metrics
+    logger.info("\n Starting evaluation...")
+    eval_name = 'test' if args.eval else 'train'
+    evaluate(args.model_path, eval_name, visible_count=visible_count, wandb=wandb, logger=logger)
+    logger.info("\nEvaluating complete.")
