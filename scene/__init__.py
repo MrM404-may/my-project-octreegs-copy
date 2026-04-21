@@ -215,3 +215,22 @@ class Scene:
         if released_count > 0:
             torch.cuda.empty_cache()
         return released_count
+    
+    def loadRegionCameras(self, camera_ids):
+        """Load all cameras in a region to GPU"""
+        loaded_count = 0
+        for camera_id in camera_ids:
+            if self.ensureCameraLoaded(camera_id):
+                loaded_count += 1
+        return loaded_count
+    
+    def switchRegion(self, prev_camera_ids, next_camera_ids):
+        """Switch region: release previous region and load next region"""
+        # Release previous region
+        if prev_camera_ids is not None and len(prev_camera_ids) > 0:
+            self.releaseMultipleCameras(prev_camera_ids)
+        # Load next region
+        loaded = 0
+        if next_camera_ids is not None and len(next_camera_ids) > 0:
+            loaded = self.loadRegionCameras(next_camera_ids)
+        return loaded

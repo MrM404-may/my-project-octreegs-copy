@@ -506,3 +506,4499 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
 
     # 5. 初始化第一个区域
     current_region_id
+
+
+#
+# Copyright (C
+
+#
+# Copyright (C) 2023, Inria
+
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+#
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=sub
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import maked
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import pre
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tq
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ======================
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+#
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND =
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REG
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BO
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter),
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER =
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(s
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() *
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path,
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAV
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ======================
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 =====================
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r',
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+            if isinstance(camera_data, list):
+                for cam in camera_data:
+                    if '
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+            if isinstance(camera_data, list):
+                for cam in camera_data:
+                    if 'id' in cam and 'img_name' in
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+            if isinstance(camera_data, list):
+                for cam in camera_data:
+                    if 'id' in cam and 'img_name' in cam:
+                        cam_id = str(cam
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+            if isinstance(camera_data, list):
+                for cam in camera_data:
+                    if 'id' in cam and 'img_name' in cam:
+                        cam_id = str(cam['id'])
+                        cam_filename = cam['img_name']
+                        id_to_filename[cam
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+            if isinstance(camera_data, list):
+                for cam in camera_data:
+                    if 'id' in cam and 'img_name' in cam:
+                        cam_id = str(cam['id'])
+                        cam_filename = cam['img_name']
+                        id_to_filename[cam_id] = cam_filename
+                        filename_to_id
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+            if isinstance(camera_data, list):
+                for cam in camera_data:
+                    if 'id' in cam and 'img_name' in cam:
+                        cam_id = str(cam['id'])
+                        cam_filename = cam['img_name']
+                        id_to_filename[cam_id] = cam_filename
+                        filename_to_id[cam_filename] = cam_id
+    except
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+            if isinstance(camera_data, list):
+                for cam in camera_data:
+                    if 'id' in cam and 'img_name' in cam:
+                        cam_id = str(cam['id'])
+                        cam_filename = cam['img_name']
+                        id_to_filename[cam_id] = cam_filename
+                        filename_to_id[cam_filename] = cam_id
+    except Exception as e:
+        pass
+    return id_to_filename, filename_to_id
+
+def load
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+            if isinstance(camera_data, list):
+                for cam in camera_data:
+                    if 'id' in cam and 'img_name' in cam:
+                        cam_id = str(cam['id'])
+                        cam_filename = cam['img_name']
+                        id_to_filename[cam_id] = cam_filename
+                        filename_to_id[cam_filename] = cam_id
+    except Exception as e:
+        pass
+    return id_to_filename, filename_to_id
+
+def load_mask_for_camera(camera_obj, mask_dir, json_path, current_region_idx):
+
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+            if isinstance(camera_data, list):
+                for cam in camera_data:
+                    if 'id' in cam and 'img_name' in cam:
+                        cam_id = str(cam['id'])
+                        cam_filename = cam['img_name']
+                        id_to_filename[cam_id] = cam_filename
+                        filename_to_id[cam_filename] = cam_id
+    except Exception as e:
+        pass
+    return id_to_filename, filename_to_id
+
+def load_mask_for_camera(camera_obj, mask_dir, json_path, current_region_idx):
+    global CACHED_ID_TO_FILENAME,
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+            if isinstance(camera_data, list):
+                for cam in camera_data:
+                    if 'id' in cam and 'img_name' in cam:
+                        cam_id = str(cam['id'])
+                        cam_filename = cam['img_name']
+                        id_to_filename[cam_id] = cam_filename
+                        filename_to_id[cam_filename] = cam_id
+    except Exception as e:
+        pass
+    return id_to_filename, filename_to_id
+
+def load_mask_for_camera(camera_obj, mask_dir, json_path, current_region_idx):
+    global CACHED_ID_TO_FILENAME, CACHED_FILENAME_TO_ID, C
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+            if isinstance(camera_data, list):
+                for cam in camera_data:
+                    if 'id' in cam and 'img_name' in cam:
+                        cam_id = str(cam['id'])
+                        cam_filename = cam['img_name']
+                        id_to_filename[cam_id] = cam_filename
+                        filename_to_id[cam_filename] = cam_id
+    except Exception as e:
+        pass
+    return id_to_filename, filename_to_id
+
+def load_mask_for_camera(camera_obj, mask_dir, json_path, current_region_idx):
+    global CACHED_ID_TO_FILENAME, CACHED_FILENAME_TO_ID, CACHED_MASKS
+    cam_filename = camera_obj.image_name
+    
+    if CACHED
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+            if isinstance(camera_data, list):
+                for cam in camera_data:
+                    if 'id' in cam and 'img_name' in cam:
+                        cam_id = str(cam['id'])
+                        cam_filename = cam['img_name']
+                        id_to_filename[cam_id] = cam_filename
+                        filename_to_id[cam_filename] = cam_id
+    except Exception as e:
+        pass
+    return id_to_filename, filename_to_id
+
+def load_mask_for_camera(camera_obj, mask_dir, json_path, current_region_idx):
+    global CACHED_ID_TO_FILENAME, CACHED_FILENAME_TO_ID, CACHED_MASKS
+    cam_filename = camera_obj.image_name
+    
+    if CACHED_FILENAME_TO_ID is None:
+        CACHED_ID_TO_FILENAME, C
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+            if isinstance(camera_data, list):
+                for cam in camera_data:
+                    if 'id' in cam and 'img_name' in cam:
+                        cam_id = str(cam['id'])
+                        cam_filename = cam['img_name']
+                        id_to_filename[cam_id] = cam_filename
+                        filename_to_id[cam_filename] = cam_id
+    except Exception as e:
+        pass
+    return id_to_filename, filename_to_id
+
+def load_mask_for_camera(camera_obj, mask_dir, json_path, current_region_idx):
+    global CACHED_ID_TO_FILENAME, CACHED_FILENAME_TO_ID, CACHED_MASKS
+    cam_filename = camera_obj.image_name
+    
+    if CACHED_FILENAME_TO_ID is None:
+        CACHED_ID_TO_FILENAME, CACHED_FILENAME_TO_ID = load_camera_id_mapping(json_path)
+    
+    if
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+            if isinstance(camera_data, list):
+                for cam in camera_data:
+                    if 'id' in cam and 'img_name' in cam:
+                        cam_id = str(cam['id'])
+                        cam_filename = cam['img_name']
+                        id_to_filename[cam_id] = cam_filename
+                        filename_to_id[cam_filename] = cam_id
+    except Exception as e:
+        pass
+    return id_to_filename, filename_to_id
+
+def load_mask_for_camera(camera_obj, mask_dir, json_path, current_region_idx):
+    global CACHED_ID_TO_FILENAME, CACHED_FILENAME_TO_ID, CACHED_MASKS
+    cam_filename = camera_obj.image_name
+    
+    if CACHED_FILENAME_TO_ID is None:
+        CACHED_ID_TO_FILENAME, CACHED_FILENAME_TO_ID = load_camera_id_mapping(json_path)
+    
+    if cam_filename in CACHED_MASKS:
+        return CACHED_MASKS[
+
+#
+# Copyright (C) 2023, Inria
+# GRAPHDECO research group, 
+# All rights reserved.
+#
+# This software is free for non-commercial, research and evaluation use 
+# under the terms of the LICENSE.md file.
+#
+# For inquiries contact  george.drettakis@inria.fr
+#
+
+import os
+import numpy as np
+
+import subprocess
+cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
+
+os.system('echo $CUDA_VISIBLE_DEVICES')
+
+
+import torch
+import torchvision
+import json
+import wandb
+import time
+from os import makedirs
+import shutil
+from pathlib import Path
+from PIL import Image
+import torchvision.transforms.functional as tf
+import lpips
+import random
+from random import randint
+from utils.loss_utils import l1_loss, ssim
+from gaussian_renderer import prefilter_voxel, render, network_gui
+import sys
+from scene import Scene, GaussianModel
+from utils.general_utils import safe_state
+import uuid
+from tqdm import tqdm
+from utils.image_utils import psnr
+from argparse import ArgumentParser, Namespace
+from arguments import ModelParams, PipelineParams, OptimizationParams
+import cv2
+# ====================== 新增：引入分区训练依赖 ======================
+from shapely.geometry import Polygon
+# =====================================================================
+from region import get_camera_ids_by_regions  # 保持原有导入
+from send_email import send_mail  # 用于训练完成后发送通知邮件
+# torch.set_num_threads(32)
+lpips_fn = lpips.LPIPS(net='vgg').to('cuda')
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+    TENSORBOARD_FOUND = True
+    print("found tf board")
+except ImportError:
+    TENSORBOARD_FOUND = False
+    print("not found tf board")
+# ====================== 全局变量：存储多区域相机池 ======================
+REGION_CAMERA_POOLS = {}  # {区域索引: [相机对象列表]}
+REGIONS_CONFIG = []       # 存储加载的多区域配置
+REGION_ITER_BOUNDS = []   # 存储每个区域的迭代边界 [(start_iter, end_iter), ...]
+REGION_LOCAL_ITERS = {}   # 【新增】每个区域的本地迭代计数器 {区域索引: 当前本地迭代数}
+TOTAL_TRAIN_ITER = 0      # 总训练迭代数
+# ====================== 新增：加载多区域配置函数 ======================
+def save_masked_gt(gt_image, mask, camera_filename, region_idx, region_name):
+    save_dir = os.path.join(MASK_VIS_ROOT_DIR, f"region_{region_idx}_{region_name}")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    gt_np = (gt_image.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    mask_expanded = mask.unsqueeze(0).repeat(3, 1, 1)
+    masked_gt = gt_image * mask_expanded
+    masked_gt_np = (masked_gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+    
+    save_path = os.path.join(save_dir, f"{os.path.splitext(camera_filename)[0]}_gt_masked.png")
+    cv2.imwrite(save_path, masked_gt_np)
+    
+    SAVED_CAMERAS[region_idx].add(camera_filename)
+
+# ====================== 核心：ID→文件名→掩码映射 ======================
+def load_camera_id_mapping(json_path):
+    id_to_filename = {}
+    filename_to_id = {}
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            camera_data = json.load(f)
+            if isinstance(camera_data, list):
+                for cam in camera_data:
+                    if 'id' in cam and 'img_name' in cam:
+                        cam_id = str(cam['id'])
+                        cam_filename = cam['img_name']
+                        id_to_filename[cam_id] = cam_filename
+                        filename_to_id[cam_filename] = cam_id
+    except Exception as e:
+        pass
+    return id_to_filename, filename_to_id
+
+def load_mask_for_camera(camera_obj, mask_dir, json_path, current_region_idx):
+    global CACHED_ID_TO_FILENAME, CACHED_FILENAME_TO_ID, CACHED_MASKS
+    cam_filename = camera_obj.image_name
+    
+    if CACHED_FILENAME_TO_ID is None:
+        CACHED_ID_TO_FILENAME, CACHED_FILENAME_TO_ID = load_camera_id_mapping(json_path)
+    
+    if cam_filename in CACHED_MASKS:
+        return CACHED_MASKS[cam_filename]
+
+    cam_id = CACHED_FILENAME_TO_ID.get(cam_filename
