@@ -17,7 +17,7 @@ from utils.system_utils import searchForMaxIteration
 from scene.dataset_readers import sceneLoadTypeCallbacks, storePly
 from scene.gaussian_model import GaussianModel
 from arguments import ModelParams
-from utils.camera_utils import cameraList_from_camInfos, camera_to_JSON
+from utils.camera_utils import cameraList_from_camInfos, camera_to_JSON, loadCam
 
 class Scene:
 
@@ -31,6 +31,7 @@ class Scene:
         self.loaded_iter = None
         self.gaussians = gaussians
         self.resolution_scales = resolution_scales
+        self.args = args
 
         if load_iteration:
             if load_iteration == -1:
@@ -40,6 +41,10 @@ class Scene:
                 
             print("Loading trained model at iteration {}".format(self.loaded_iter))
 
+        # 存储相机信息而不是相机对象，实现延迟加载
+        self.train_camera_infos = {}
+        self.test_camera_infos = {}
+        # 存储创建的相机对象
         self.train_cameras = {}
         self.test_cameras = {}
 
@@ -64,6 +69,9 @@ class Scene:
                 json_cams.append(camera_to_JSON(id, cam))
             with open(os.path.join(self.model_path, "cameras.json"), 'w') as file:
                 json.dump(json_cams, file)
+        else:
+            # 加载迭代时不需要点云处理
+            points = None
 
         if shuffle:
             random.shuffle(scene_info.train_cameras)  # Multi-res consistent random shuffling
@@ -71,11 +79,15 @@ class Scene:
 
         self.cameras_extent = scene_info.nerf_normalization["radius"]
 
+        # 存储相机信息，不立即创建相机对象
         for resolution_scale in self.resolution_scales:
-            print("Loading Training Cameras")
-            self.train_cameras[resolution_scale] = cameraList_from_camInfos(scene_info.train_cameras, resolution_scale, args)
-            print("Loading Test Cameras")
-            self.test_cameras[resolution_scale] = cameraList_from_camInfos(scene_info.test_cameras, resolution_scale, args)
+            print("Storing Training Camera Infos")
+            self.train_camera_infos[resolution_scale] = scene_info.train_cameras
+            print("Storing Test Camera Infos")
+            self.test_camera_infos[resolution_scale] = scene_info.test_cameras
+            # 初始化相机对象字典
+            self.train_cameras[resolution_scale] = {}
+            self.test_cameras[resolution_scale] = {}
 
         if self.loaded_iter:
             self.gaussians.load_ply_sparse_gaussian(os.path.join(self.model_path,
@@ -95,7 +107,8 @@ class Scene:
             else:
                 logger.info("Using black background")
             points = torch.unique(points, dim=0)
-            self.gaussians.set_level(points, self.train_cameras, self.resolution_scales, args.dist_ratio, args.init_level, args.levels)
+            # 传递相机信息而不是相机对象
+            self.gaussians.set_level(points, self, self.resolution_scales, args.dist_ratio, args.init_level, args.levels)
             self.gaussians.create_from_pcd(points, self.cameras_extent, logger)
 
     def save_ply(self, pcd, ratio, path):
@@ -109,36 +122,53 @@ class Scene:
         self.gaussians.save_ply(os.path.join(point_cloud_path, "point_cloud.ply"))
         self.gaussians.save_mlp_checkpoints(point_cloud_path)
 
-    def getTrainCameras(self):
+    def getTrainCameras(self, scale=None):
+        """获取训练相机，支持按分辨率缩放获取"""
         all_cams = []   
-        for scale in self.resolution_scales:
-            all_cams.extend(self.train_cameras[scale])
+        if scale is not None:
+            if scale in self.resolution_scales:
+                # 确保所有相机都已创建
+                self._ensure_cameras_created(scale, 'train')
+                all_cams.extend(self.train_cameras[scale].values())
+        else:
+            for s in self.resolution_scales:
+                # 确保所有相机都已创建
+                self._ensure_cameras_created(s, 'train')
+                all_cams.extend(self.train_cameras[s].values())
         return all_cams
 
     def getTestCameras(self):
+        """获取测试相机"""
         all_cams = []   
         for scale in self.resolution_scales:
-            all_cams.extend(self.test_cameras[scale])
+            # 确保所有相机都已创建
+            self._ensure_cameras_created(scale, 'test')
+            all_cams.extend(self.test_cameras[scale].values())
         return all_cams
+    
+    def _ensure_cameras_created(self, resolution_scale, cam_type):
+        """确保指定分辨率和类型的相机已创建"""
+        if cam_type == 'train':
+            cam_infos = self.train_camera_infos.get(resolution_scale, [])
+            cam_dict = self.train_cameras[resolution_scale]
+        else:
+            cam_infos = self.test_camera_infos.get(resolution_scale, [])
+            cam_dict = self.test_cameras[resolution_scale]
+        
+        # 只创建未创建的相机
+        for id, cam_info in enumerate(cam_infos):
+            if id not in cam_dict:
+                # 创建相机对象，默认不加载图像
+                cam = loadCam(self.args, id, cam_info, resolution_scale, load_image=False)
+                cam_dict[id] = cam
 
     def releaseCameraMemory(self, camera_id):
         """Release GPU memory for a specific camera by ID"""
-        # Release from train cameras
-        for scale in self.resolution_scales:
-            if scale in self.train_cameras:
-                for cam in self.train_cameras[scale]:
-                    if cam.uid == camera_id:
-                        if hasattr(cam, 'release_image_from_gpu'):
-                            cam.release_image_from_gpu()
-                            return True
-        # Release from test cameras
-        for scale in self.resolution_scales:
-            if scale in self.test_cameras:
-                for cam in self.test_cameras[scale]:
-                    if cam.uid == camera_id:
-                        if hasattr(cam, 'release_image_from_gpu'):
-                            cam.release_image_from_gpu()
-                            return True
+        # 确保相机已创建
+        cam = self.get_camera_by_id(camera_id)
+        if cam and hasattr(cam, 'release_image_from_gpu'):
+            cam.release_image_from_gpu()
+            return True
         return False
 
     def releaseAllTrainCamerasMemory(self):
@@ -146,7 +176,9 @@ class Scene:
         released_count = 0
         for scale in self.resolution_scales:
             if scale in self.train_cameras:
-                for cam in self.train_cameras[scale]:
+                # 确保相机已创建
+                self._ensure_cameras_created(scale, 'train')
+                for cam in self.train_cameras[scale].values():
                     if hasattr(cam, 'release_image_from_gpu'):
                         if cam.release_image_from_gpu():
                             released_count += 1
@@ -157,44 +189,22 @@ class Scene:
 
     def reloadCameraImage(self, camera_id):
         """Reload image to GPU for a specific camera by ID"""
-        # Reload from train cameras
-        for scale in self.resolution_scales:
-            if scale in self.train_cameras:
-                for cam in self.train_cameras[scale]:
-                    if cam.uid == camera_id:
-                        if hasattr(cam, 'reload_image'):
-                            cam.reload_image()
-                            return True
-        # Reload from test cameras
-        for scale in self.resolution_scales:
-            if scale in self.test_cameras:
-                for cam in self.test_cameras[scale]:
-                    if cam.uid == camera_id:
-                        if hasattr(cam, 'reload_image'):
-                            cam.reload_image()
-                            return True
+        # 确保相机已创建
+        cam = self.get_camera_by_id(camera_id)
+        if cam and hasattr(cam, 'reload_image'):
+            cam.reload_image()
+            return True
         return False
     
     def ensureCameraLoaded(self, camera_id):
         """Ensure a camera's image is loaded on GPU, loading it if necessary"""
-        # Check train cameras
-        for scale in self.resolution_scales:
-            if scale in self.train_cameras:
-                for cam in self.train_cameras[scale]:
-                    if cam.uid == camera_id:
-                        if hasattr(cam, 'is_image_loaded') and not cam.is_image_loaded():
-                            if hasattr(cam, 'reload_image'):
-                                cam.reload_image()
-                        return True
-        # Check test cameras
-        for scale in self.resolution_scales:
-            if scale in self.test_cameras:
-                for cam in self.test_cameras[scale]:
-                    if cam.uid == camera_id:
-                        if hasattr(cam, 'is_image_loaded') and not cam.is_image_loaded():
-                            if hasattr(cam, 'reload_image'):
-                                cam.reload_image()
-                        return True
+        # 确保相机已创建
+        cam = self.get_camera_by_id(camera_id)
+        if cam:
+            if hasattr(cam, 'is_image_loaded') and not cam.is_image_loaded():
+                if hasattr(cam, 'reload_image'):
+                    cam.reload_image()
+            return True
         return False
 
     def reloadMultipleCameras(self, camera_ids):
@@ -217,17 +227,21 @@ class Scene:
         return released_count
     
     def get_camera_by_id(self, camera_id):
-        """根据相机ID获取相机对象"""
+        """根据相机ID获取相机对象，支持延迟加载"""
         # 检查训练相机
         for scale in self.resolution_scales:
             if scale in self.train_cameras:
-                for cam in self.train_cameras[scale]:
+                # 确保相机已创建
+                self._ensure_cameras_created(scale, 'train')
+                for cam in self.train_cameras[scale].values():
                     if cam.uid == camera_id:
                         return cam
         # 检查测试相机
         for scale in self.resolution_scales:
             if scale in self.test_cameras:
-                for cam in self.test_cameras[scale]:
+                # 确保相机已创建
+                self._ensure_cameras_created(scale, 'test')
+                for cam in self.test_cameras[scale].values():
                     if cam.uid == camera_id:
                         return cam
         return None

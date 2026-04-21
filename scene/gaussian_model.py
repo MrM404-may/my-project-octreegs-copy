@@ -255,11 +255,13 @@ class GaussianModel:
                 temp_interval = interval
                 self.coarse_intervals.append(interval)
 
-    def set_level(self, points, cameras, scales, dist_ratio=0.95, init_level=-1, levels=-1):
+    def set_level(self, points, scene, scales, dist_ratio=0.95, init_level=-1, levels=-1):
         all_dist = torch.tensor([]).cuda()
         self.cam_infos = torch.empty(0, 4).float().cuda()
         for scale in scales:
-            for cam in cameras[scale]:
+            # 获取指定缩放比例的相机对象列表
+            cameras = scene.getTrainCameras(scale)
+            for cam in cameras:
                 cam_center = cam.camera_center
                 cam_info = torch.tensor([cam_center[0], cam_center[1], cam_center[2], scale]).float().cuda()
                 self.cam_infos = torch.cat((self.cam_infos, cam_info.unsqueeze(dim=0)), dim=0)
