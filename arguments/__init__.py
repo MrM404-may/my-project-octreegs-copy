@@ -153,7 +153,7 @@ class OptimizationParams(ParamGroup):
         self.update_from = 1500
         self.coarse_iter = 10000
         self.coarse_factor = 1.5
-        self.update_interval = 100
+        self.update_interval = 500
         self.update_until = 25000
         self.update_anchor = True
 
