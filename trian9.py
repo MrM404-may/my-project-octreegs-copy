@@ -522,39 +522,30 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
     # gaussians.restore_initial_state()
     gaussians.set_region(current_region_idx)  
     
-    # 初始化批量加载相机相关变量
-    batch_size = 100
-    current_batch_idx = 0
-    camera_sequence = []
-    current_batch_cameras = []
+    # 初始化区域相机管理
+    current_camera_pool = REGION_CAMERA_POOLS[current_region_idx]
     
-    # 生成第一个随机训练序列
+    # 生成随机训练序列
     def generate_random_sequence(camera_pool):
         """生成随机训练序列"""
-        # camera_pool现在是相机ID列表，直接打乱它
         sequence = camera_pool.copy()
         random.shuffle(sequence)
         return sequence
     
-    # 加载当前区域的相机池
-    current_camera_pool = REGION_CAMERA_POOLS[current_region_idx]
-    # 生成随机训练序列
-    camera_sequence = generate_random_sequence(current_camera_pool)
-    # 计算批次数
-    num_batches = (len(camera_sequence) + batch_size - 1) // batch_size
-    start_iter, end_iter = REGION_ITER_BOUNDS[current_region_idx]
-    print("region 1 start_iter, end_iter", start_iter, end_iter)
-    start_iter, end_iter = REGION_ITER_BOUNDS[current_region_idx+1]
-    print("region 2 start_iter, end_iter", start_iter, end_iter)
-    # ===============================================================================
-
     # 初始化进度条，使用当前区域的迭代次数作为总长度
     current_region_total_iters = current_region['iterations']
     progress_bar = tqdm(total=current_region_total_iters, desc=f"Training [Region {current_region_idx+1}: {current_region['name']}]", leave=True)
-    progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "Batches": num_batches, "LocalIter": f"0/{current_region_total_iters}"})
-    scene.release_images()
-    torch.cuda.empty_cache()
-    current_batch_cameras_list = []
+    progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "LocalIter": f"0/{current_region_total_iters}"})
+    
+    # 【需求1】初始化时加载第一个区域照片到GPU
+    print(f"[Init] 加载第一个区域 ({current_region['name']}) 的相机到 GPU...")
+    scene.load_region_cameras(current_camera_pool)
+    print(f"[Init] 第一个区域相机加载完成，共 {len(current_camera_pool)} 个相机")
+    
+    # 生成第一个区域的随机训练序列
+    camera_sequence = generate_random_sequence(current_camera_pool)
+    sequence_index = 0
+    
     # 训练循环
     for iteration in range(first_iter, TOTAL_TRAIN_ITER + 1):        
         # network gui not available in octree-gs yet
@@ -593,6 +584,11 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
                 gaussians.clean_out_region(current_polygon, f"Region_{current_region_idx}")
                 gaussians.clean_in_region()
                 gaussians.exit_and_cleanup()
+                
+                # 【需求2】释放上个区域的照片在CPU或者GPU内存
+                print(f"[Region Switch] 释放区域 {prev_region_idx+1} ({prev_region_config['name']}) 的相机内存...")
+                scene.release_region_cameras(REGION_CAMERA_POOLS[prev_region_idx])
+                print(f"[Region Switch] 区域 {prev_region_idx+1} 相机内存释放完成")
         
                 # 2. 切换变量
                 current_region_idx = region_idx
@@ -606,16 +602,18 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
                 gaussians.enter_region(current_polygon)
                 gaussians.set_region(current_region_idx)        
                 
-                # 重置批量加载相机相关变量
-                current_batch_idx = 0
+                # 【需求2】加载下个区域需要的所有照片到GPU
                 current_camera_pool = REGION_CAMERA_POOLS[current_region_idx]
+                print(f"[Region Switch] 加载新区域 {current_region_idx+1} ({current_region['name']}) 的相机到 GPU...")
+                scene.load_region_cameras(current_camera_pool)
+                print(f"[Region Switch] 新区域相机加载完成，共 {len(current_camera_pool)} 个相机")
+                
+                # 生成新区域的随机训练序列
                 camera_sequence = generate_random_sequence(current_camera_pool)
-                num_batches = (len(camera_sequence) + batch_size - 1) // batch_size
-                current_batch_cameras = []
-                current_batch_cameras_list = []
+                sequence_index = 0
 
                 progress_bar.set_description(f"Training [Region {current_region_idx+1}: {current_region['name']}]")
-                progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "Batches": num_batches, "LocalIter": "0/{current_region['iterations']}", "Status": "Ready"})
+                progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "LocalIter": "0/{current_region['iterations']}", "Status": "Ready"})
                 
                 progress_bar.set_description(f"Training [Region {current_region_idx+1}: {current_region['name']}]")
                 send_mail(f"switching from region {prev_region_idx} to {current_region_idx} at iteration {iteration}")
@@ -626,40 +624,6 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
         REGION_LOCAL_ITERS[current_region_idx] += 1
         current_local_iter = REGION_LOCAL_ITERS[current_region_idx]  # 获取当前区域的本地步数
         current_region_total_iters = current_region['iterations']    # 获取当前区域的总步数
-        # ===========================================================================
-
-        # ====================== 批量加载相机逻辑 ======================
-        # 检查是否需要加载新批次
-        if not current_batch_cameras_list:
-            if current_batch_idx < num_batches:
-                # 当批次用完时释放内存
-                scene.release_images()
-                torch.cuda.empty_cache()
-                # 加载下一个批次
-                start_idx = current_batch_idx * batch_size
-                end_idx = min(start_idx + batch_size, len(camera_sequence))
-                current_batch_cameras = camera_sequence[start_idx:end_idx]
-
-                progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "Batches": num_batches, "LocalIter": f"{current_local_iter}/{current_region['iterations']}", "Status": f"LoadBatch {current_batch_idx+1}/{num_batches}"})
-                # 根据相机ID加载相机
-                current_batch_cameras_list = scene.load_cameras_by_ids(current_batch_cameras)
-                current_batch_idx += 1
-            else:
-                # 当批次用完时释放内存
-                scene.release_images()
-                torch.cuda.empty_cache()
-                # 所有批次加载完毕，生成新的随机序列
-                camera_sequence = generate_random_sequence(current_camera_pool)
-                current_batch_idx = 0
-                num_batches = (len(camera_sequence) + batch_size - 1) // batch_size
-                # 加载第一个批次
-                start_idx = current_batch_idx * batch_size
-                end_idx = min(start_idx + batch_size, len(camera_sequence))
-                current_batch_cameras = camera_sequence[start_idx:end_idx]
-                progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "Batches": num_batches, "LocalIter": f"{current_local_iter}/{current_region['iterations']}", "Status": f"LoadBatch {current_batch_idx+1}/{num_batches}"})
-                # 根据相机ID加载相机
-                current_batch_cameras_list = scene.load_cameras_by_ids(current_batch_cameras)
-                current_batch_idx += 1
         # ===========================================================================
 
         iter_start.record()
@@ -674,12 +638,17 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
             bg_color = [0.0, 0.0, 0.0]
         background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
         
-  
- 
-        # 随机选择当前批次中的一个相机ID
-        # 直接从当前批次加载的相机中随机选择一个
-
-        viewpoint_cam = current_batch_cameras_list.pop()
+        # 【需求3】在区域训练时，无需反复加载和释放照片，数据操作就只在GPU上进行
+        # 从当前区域的相机池中随机选择一个相机
+        if sequence_index >= len(camera_sequence):
+            # 序列用完，重新生成
+            camera_sequence = generate_random_sequence(current_camera_pool)
+            sequence_index = 0
+        
+        # 获取相机ID并从映射中获取相机对象
+        camera_id = camera_sequence[sequence_index]
+        viewpoint_cam = scene.camera_id_map[camera_id]
+        sequence_index += 1
         
         # Render
         if (iteration - 1) == debug_from:

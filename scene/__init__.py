@@ -23,7 +23,7 @@ class Scene:
 
     gaussians : GaussianModel
 
-    def __init__(self, args : ModelParams, gaussians : GaussianModel, load_iteration=None, shuffle=True, resolution_scales=[1.0], ply_path=None, logger=None):
+    def __init__(self, args : ModelParams, gaussians : GaussianModel, load_iteration=None, shuffle=True, resolution_scales=[1.0], ply_path=None, logger=None, batch_size=None):
         """
         :param path: Path to colmap scene main folder.
         """
@@ -31,6 +31,7 @@ class Scene:
         self.loaded_iter = None
         self.gaussians = gaussians
         self.resolution_scales = resolution_scales
+        self.logger = logger
 
         if load_iteration:
             if load_iteration == -1:
@@ -42,6 +43,7 @@ class Scene:
 
         self.train_cameras = {}
         self.test_cameras = {}
+        self.camera_id_map = {}  # 相机ID到相机对象的映射
 
         if os.path.exists(os.path.join(args.source_path, "sparse")):
             scene_info = sceneLoadTypeCallbacks["Colmap"](args.source_path, args.images, args.eval, args.ds)
@@ -76,6 +78,13 @@ class Scene:
             self.train_cameras[resolution_scale] = cameraList_from_camInfos(scene_info.train_cameras, resolution_scale, args)
             print("Loading Test Cameras")
             self.test_cameras[resolution_scale] = cameraList_from_camInfos(scene_info.test_cameras, resolution_scale, args)
+
+        # 构建相机ID到相机对象的映射
+        for scale in self.resolution_scales:
+            for cam in self.train_cameras[scale]:
+                self.camera_id_map[cam.uid] = cam
+            for cam in self.test_cameras[scale]:
+                self.camera_id_map[cam.uid] = cam
 
         if self.loaded_iter:
             self.gaussians.load_ply_sparse_gaussian(os.path.join(self.model_path,
@@ -215,3 +224,50 @@ class Scene:
         if released_count > 0:
             torch.cuda.empty_cache()
         return released_count
+
+    def load_cameras_by_ids(self, camera_ids):
+        """根据相机ID列表加载相机对象并将图像加载到GPU"""
+        cameras = []
+        for camera_id in camera_ids:
+            if camera_id in self.camera_id_map:
+                cam = self.camera_id_map[camera_id]
+                # 加载图像到GPU
+                cam.load_image_to_gpu()
+                cameras.append(cam)
+        return cameras
+
+    def load_region_cameras(self, camera_ids):
+        """加载区域相机到GPU"""
+        """加载区域相机到GPU，用于区域训练"""
+        loaded_cameras = []
+        for camera_id in camera_ids:
+            if camera_id in self.camera_id_map:
+                cam = self.camera_id_map[camera_id]
+                # 加载图像到GPU
+                cam.load_image_to_gpu()
+                loaded_cameras.append(cam)
+        return loaded_cameras
+
+    def release_region_cameras(self, camera_ids):
+        """释放区域相机的GPU内存"""
+        released_count = 0
+        for camera_id in camera_ids:
+            if self.releaseCameraMemory(camera_id):
+                released_count += 1
+        if released_count > 0:
+            torch.cuda.empty_cache()
+        return released_count
+
+    def release_images(self):
+        """释放所有相机的图像内存"""
+        # 释放训练相机
+        for scale in self.resolution_scales:
+            if scale in self.train_cameras:
+                for cam in self.train_cameras[scale]:
+                    cam.release_image_from_gpu()
+        # 释放测试相机
+        for scale in self.resolution_scales:
+            if scale in self.test_cameras:
+                for cam in self.test_cameras[scale]:
+                    cam.release_image_from_gpu()
+        torch.cuda.empty_cache()

@@ -13,12 +13,14 @@ import torch
 from torch import nn
 import numpy as np
 from utils.graphics_utils import getWorld2View2, getProjectionMatrix
+from utils.general_utils import PILtoTorch
+from PIL import Image
 
 class Camera(nn.Module):
-    def __init__(self, colmap_id, R, T, FoVx, FoVy, image, gt_alpha_mask,
+    def __init__(self, colmap_id, R, T, FoVx, FoVy, image_path, gt_alpha_mask_path,
                  image_name, resolution_scale, uid,
                  trans=np.array([0.0, 0.0, 0.0]), scale=1.0, data_device = "cuda",
-                 load_image=True
+                 image_size=None
                  ):
         super(Camera, self).__init__()
 
@@ -38,17 +40,17 @@ class Camera(nn.Module):
             print(f"[Warning] Custom device {data_device} failed, fallback to default cuda device" )
             self.data_device = torch.device("cuda")
 
-        # Store image data on CPU to save GPU memory
-        self._image_data_cpu = image.cpu().clone()
-        self._gt_alpha_mask_cpu = gt_alpha_mask.cpu().clone() if gt_alpha_mask is not None else None
+        # 只保存图像路径，不加载图像数据
+        self.image_path = image_path
+        self.gt_alpha_mask_path = gt_alpha_mask_path
         
-        # Store dimensions
-        self.image_width = self._image_data_cpu.shape[2]
-        self.image_height = self._image_data_cpu.shape[1]
-
-        # Initialize image on GPU only if requested
-        if load_image:
-            self._load_image_to_gpu()
+        # 存储图像尺寸
+        if image_size:
+            self.image_width, self.image_height = image_size
+        else:
+            # 从路径获取图像尺寸
+            with Image.open(image_path) as img:
+                self.image_width, self.image_height = img.size
 
         self.zfar = 100.0
         self.znear = 0.01
@@ -61,17 +63,28 @@ class Camera(nn.Module):
         self.full_proj_transform = (self.world_view_transform.unsqueeze(0).bmm(self.projection_matrix.unsqueeze(0))).squeeze(0)
         self.camera_center = self.world_view_transform.inverse()[3, :3]
 
-    def _load_image_to_gpu(self):
-        """Load image from CPU to GPU"""
-        self.original_image = self._image_data_cpu.clamp(0.0, 1.0).to(self.data_device)
+    def load_image_to_gpu(self):
+        """从磁盘加载图像到 GPU"""
+        # 从磁盘读取图像
+        image = Image.open(self.image_path)
+        # 调整分辨率
+        from utils.camera_utils import loadCam
+        # 这里需要根据 resolution_scale 调整图像大小
+        # 简化处理，直接使用原始尺寸
+        resized_image_rgb = PILtoTorch(image, (self.image_width, self.image_height))
         
-        if self._gt_alpha_mask_cpu is not None:
-            self.original_image *= self._gt_alpha_mask_cpu.to(self.data_device)
+        # 存储到 GPU
+        self.original_image = resized_image_rgb[:3, ...].clamp(0.0, 1.0).to(self.data_device)
+        
+        if self.gt_alpha_mask_path:
+            mask = Image.open(self.gt_alpha_mask_path)
+            mask_rgb = PILtoTorch(mask, (self.image_width, self.image_height))
+            self.original_image *= mask_rgb[:1, ...].to(self.data_device)
         else:
             self.original_image *= torch.ones((1, self.image_height, self.image_width), device=self.data_device)
 
     def release_image_from_gpu(self):
-        """Release GPU memory for this camera's image"""
+        """释放 GPU 中的图像内存"""
         if hasattr(self, 'original_image'):
             del self.original_image
             torch.cuda.empty_cache()
@@ -79,12 +92,12 @@ class Camera(nn.Module):
         return False
 
     def reload_image(self):
-        """Reload the image from CPU to GPU"""
-        self._load_image_to_gpu()
+        """重新从磁盘加载图像到 GPU"""
+        self.load_image_to_gpu()
         return self.original_image
     
     def is_image_loaded(self):
-        """Check if image is loaded on GPU"""
+        """检查图像是否在 GPU 上"""
         return hasattr(self, 'original_image')
 
 class MiniCam:

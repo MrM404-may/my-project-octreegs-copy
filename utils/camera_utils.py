@@ -9,6 +9,7 @@
 # For inquiries contact  george.drettakis@inria.fr
 #
 
+
 from scene.cameras import Camera
 import numpy as np
 from utils.general_utils import PILtoTorch
@@ -16,8 +17,16 @@ from utils.graphics_utils import fov2focal
 
 WARNED = False
 
-def loadCam(args, id, cam_info, resolution_scale, load_image=True):
-    orig_w, orig_h = cam_info.image.size
+def loadCam(args, id, cam_info, resolution_scale):
+    # 确保 cam_info 有图像路径属性
+    image_path = getattr(cam_info, 'image_path', None)
+    if not image_path:
+        raise ValueError(f"cam_info for camera {id} missing image_path attribute")
+    
+    # 获取图像尺寸
+    from PIL import Image
+    with Image.open(image_path) as img:
+        orig_w, orig_h = img.size
 
     if args.resolution in [1, 2, 4, 8]:
         resolution = round(orig_w/(resolution_scale * args.resolution)), round(orig_h/(resolution_scale * args.resolution))
@@ -38,31 +47,27 @@ def loadCam(args, id, cam_info, resolution_scale, load_image=True):
         scale = float(global_down) * float(resolution_scale)
         resolution = (int(orig_w / scale), int(orig_h / scale))
 
-    resized_image_rgb = PILtoTorch(cam_info.image, resolution)
-
-    gt_image = resized_image_rgb[:3, ...]
-    loaded_mask = None
-
-    # print(f'gt_image: {gt_image.shape}')
-    if resized_image_rgb.shape[1] == 4:
-        loaded_mask = resized_image_rgb[3:4, ...]
-
-    # Ensure cam_info has uid attribute
+    # 确保 cam_info 有 uid 属性
     cam_uid = getattr(cam_info, 'uid', id)
+    
+    # 构建掩码路径（如果存在）
+    gt_alpha_mask_path = None
+    if hasattr(cam_info, 'gt_alpha_mask_path'):
+        gt_alpha_mask_path = cam_info.gt_alpha_mask_path
 
     return Camera(colmap_id=cam_uid, R=cam_info.R, T=cam_info.T, 
                   FoVx=cam_info.FovX, FoVy=cam_info.FovY, 
-                  image=gt_image, gt_alpha_mask=loaded_mask,
+                  image_path=image_path, gt_alpha_mask_path=gt_alpha_mask_path,
                   image_name=cam_info.image_name, resolution_scale=resolution_scale, 
-                  uid=id, data_device=args.data_device, load_image=load_image)
+                  uid=id, data_device=args.data_device, 
+                  image_size=resolution)
 
 def cameraList_from_camInfos(cam_infos, resolution_scale, args):
     camera_list = []
 
     for id, c in enumerate(cam_infos):
-        # Only load image for the first camera
-        load_image = (id == 0)
-        camera_list.append(loadCam(args, id, c, resolution_scale, load_image=load_image))
+        # 现在 Camera 初始化时不再加载图像，而是在需要时从磁盘加载
+        camera_list.append(loadCam(args, id, c, resolution_scale))
 
     return camera_list
 
