@@ -742,7 +742,7 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
             
             # 更新进度条
             current_region_total_iters = current_region['iterations']
-            progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "Batches": num_batches, "LocalIter": f"{current_local_iter}/{current_region_total_iters}", "Loss": f"{loss.item():.7f}"})
+            progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "LocalIter": f"{current_local_iter}/{current_region_total_iters}", "Loss": f"{loss.item():.7f}"})
             # 确保进度条的当前值不超过总迭代次数
             if current_local_iter <= current_region_total_iters:
                 progress_bar.n = current_local_iter
