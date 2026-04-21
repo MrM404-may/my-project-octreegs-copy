@@ -38,13 +38,15 @@ class Camera(nn.Module):
             print(f"[Warning] Custom device {data_device} failed, fallback to default cuda device" )
             self.data_device = torch.device("cuda")
 
-        # Store image data on CPU to save GPU memory
-        self._image_data_cpu = image.cpu().clone()
-        self._gt_alpha_mask_cpu = gt_alpha_mask.cpu().clone() if gt_alpha_mask is not None else None
+        # 不存储图像数据，只在需要时加载
+        self._image = image  # 保持原始图像引用
+        self._gt_alpha_mask = gt_alpha_mask  # 保持原始掩码引用
+        self._image_data_cpu = None  # 延迟加载到CPU
+        self._gt_alpha_mask_cpu = None  # 延迟加载到CPU
         
         # Store dimensions
-        self.image_width = self._image_data_cpu.shape[2]
-        self.image_height = self._image_data_cpu.shape[1]
+        self.image_width = image.shape[2]
+        self.image_height = image.shape[1]
 
         # Initialize image on GPU only if requested
         if load_image:
@@ -61,8 +63,19 @@ class Camera(nn.Module):
         self.full_proj_transform = (self.world_view_transform.unsqueeze(0).bmm(self.projection_matrix.unsqueeze(0))).squeeze(0)
         self.camera_center = self.world_view_transform.inverse()[3, :3]
 
+    def _load_image_to_cpu(self):
+        """Load image to CPU memory"""
+        if self._image_data_cpu is None:
+            self._image_data_cpu = self._image.cpu().clone()
+        if self._gt_alpha_mask_cpu is None and self._gt_alpha_mask is not None:
+            self._gt_alpha_mask_cpu = self._gt_alpha_mask.cpu().clone()
+
     def _load_image_to_gpu(self):
-        """Load image from CPU to GPU"""
+        """Load image from original source to GPU"""
+        # 确保图像已加载到CPU
+        self._load_image_to_cpu()
+        
+        # 加载到GPU
         self.original_image = self._image_data_cpu.clamp(0.0, 1.0).to(self.data_device)
         
         if self._gt_alpha_mask_cpu is not None:
@@ -71,15 +84,25 @@ class Camera(nn.Module):
             self.original_image *= torch.ones((1, self.image_height, self.image_width), device=self.data_device)
 
     def release_image_from_gpu(self):
-        """Release GPU memory for this camera's image"""
+        """Release both CPU and GPU memory for this camera's image"""
+        # 释放GPU内存
         if hasattr(self, 'original_image'):
             del self.original_image
             torch.cuda.empty_cache()
-            return True
-        return False
+        
+        # 释放CPU内存
+        if self._image_data_cpu is not None:
+            del self._image_data_cpu
+            self._image_data_cpu = None
+        
+        if self._gt_alpha_mask_cpu is not None:
+            del self._gt_alpha_mask_cpu
+            self._gt_alpha_mask_cpu = None
+        
+        return True
 
     def reload_image(self):
-        """Reload the image from CPU to GPU"""
+        """Reload the image to GPU"""
         self._load_image_to_gpu()
         return self.original_image
     

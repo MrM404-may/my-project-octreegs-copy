@@ -628,8 +628,14 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
                 mem_info_before = monitor_memory()
                 print(f"🔄 [Switch] 释放区域 {prev_region_idx+1} 的照片内存...")
                 print(f"   切换前内存: CPU={mem_info_before['cpu_used']:.1f}/{mem_info_before['cpu_total']:.1f}GB, GPU={mem_info_before['gpu_used']:.1f}/{mem_info_before['gpu_total']:.1f}GB")
+                
+                # 释放当前区域的所有相机内存（包括CPU和GPU）
                 scene.release_images()
-                torch.cuda.empty_cache()
+                
+                # 强制垃圾回收
+                import gc
+                gc.collect()
+                
                 mem_info_after_release = monitor_memory()
                 print(f"   释放后内存: CPU={mem_info_after_release['cpu_used']:.1f}/{mem_info_after_release['cpu_total']:.1f}GB, GPU={mem_info_after_release['gpu_used']:.1f}/{mem_info_after_release['gpu_total']:.1f}GB")
                 print(f"✅ 区域 {prev_region_idx+1} 照片内存已释放")

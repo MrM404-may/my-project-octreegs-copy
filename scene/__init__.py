@@ -259,12 +259,32 @@ class Scene:
         return loaded_cameras
     
     def release_images(self):
-        """释放所有相机的GPU内存"""
-        self.releaseAllTrainCamerasMemory()
-        # 也释放测试相机的内存
+        """释放所有相机的CPU和GPU内存"""
+        # 释放训练相机的内存
+        released_count = 0
+        for scale in self.resolution_scales:
+            if scale in self.train_cameras:
+                # 确保相机已创建
+                self._ensure_cameras_created(scale, 'train')
+                for cam in self.train_cameras[scale].values():
+                    if hasattr(cam, 'release_image_from_gpu'):
+                        if cam.release_image_from_gpu():
+                            released_count += 1
+        
+        # 释放测试相机的内存
         for scale in self.resolution_scales:
             if scale in self.test_cameras:
-                for cam in self.test_cameras[scale]:
+                # 确保相机已创建
+                self._ensure_cameras_created(scale, 'test')
+                for cam in self.test_cameras[scale].values():
                     if hasattr(cam, 'release_image_from_gpu'):
                         cam.release_image_from_gpu()
+        
+        # 清理GPU缓存
         torch.cuda.empty_cache()
+        
+        # 强制Python垃圾回收
+        import gc
+        gc.collect()
+        
+        return released_count
