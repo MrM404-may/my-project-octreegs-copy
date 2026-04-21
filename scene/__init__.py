@@ -23,14 +23,16 @@ class Scene:
 
     gaussians : GaussianModel
 
-    def __init__(self, args : ModelParams, gaussians : GaussianModel, load_iteration=None, shuffle=True, resolution_scales=[1.0], ply_path=None, logger=None):
+    def __init__(self, args : ModelParams, gaussians : GaussianModel, load_iteration=None, shuffle=True, resolution_scales=[1.0], ply_path=None, logger=None, batch_size=None):
         """
         :param path: Path to colmap scene main folder.
+        :param batch_size: 批量加载相机的批次大小（可选，主要用于支持区域训练）
         """
         self.model_path = args.model_path
         self.loaded_iter = None
         self.gaussians = gaussians
         self.resolution_scales = resolution_scales
+        self.batch_size = batch_size  # 保存批次大小参数
 
         if load_iteration:
             if load_iteration == -1:
@@ -42,6 +44,7 @@ class Scene:
 
         self.train_cameras = {}
         self.test_cameras = {}
+        self.camera_uid_map = {}  # 新增：相机 uid 到相机对象的映射，方便快速查找
 
         if os.path.exists(os.path.join(args.source_path, "sparse")):
             scene_info = sceneLoadTypeCallbacks["Colmap"](args.source_path, args.images, args.eval, args.ds)
@@ -76,6 +79,11 @@ class Scene:
             self.train_cameras[resolution_scale] = cameraList_from_camInfos(scene_info.train_cameras, resolution_scale, args)
             print("Loading Test Cameras")
             self.test_cameras[resolution_scale] = cameraList_from_camInfos(scene_info.test_cameras, resolution_scale, args)
+        
+        # 新增：建立相机 uid 到相机对象的映射（只处理训练相机，用于区域训练）
+        for resolution_scale in self.resolution_scales:
+            for cam in self.train_cameras[resolution_scale]:
+                self.camera_uid_map[cam.uid] = cam
 
         if self.loaded_iter:
             self.gaussians.load_ply_sparse_gaussian(os.path.join(self.model_path,
@@ -215,3 +223,71 @@ class Scene:
         if released_count > 0:
             torch.cuda.empty_cache()
         return released_count
+    
+    # ====================== 新增：区域训练相关的内存管理方法 ======================
+    def load_cameras_by_ids(self, camera_ids):
+        """
+        加载指定 ID 列表的相机图像到 GPU
+        :param camera_ids: 要加载的相机 ID 列表
+        :return: 加载成功的相机对象列表
+        """
+        loaded_cameras = []
+        for camera_id in camera_ids:
+            if camera_id in self.camera_uid_map:
+                cam = self.camera_uid_map[camera_id]
+                if not cam.is_image_loaded():
+                    cam.reload_image()
+                loaded_cameras.append(cam)
+        return loaded_cameras
+    
+    def release_images(self, camera_ids=None):
+        """
+        释放图像内存
+        :param camera_ids: 要释放的相机 ID 列表，如果为 None 则释放所有当前已加载的训练相机
+        """
+        released_count = 0
+        if camera_ids is not None:
+            # 释放指定 ID 列表的相机
+            for camera_id in camera_ids:
+                if camera_id in self.camera_uid_map:
+                    cam = self.camera_uid_map[camera_id]
+                    if cam.release_image_from_gpu():
+                        released_count += 1
+        else:
+            # 释放所有训练相机的图像内存
+            for resolution_scale in self.resolution_scales:
+                if resolution_scale in self.train_cameras:
+                    for cam in self.train_cameras[resolution_scale]:
+                        if cam.release_image_from_gpu():
+                            released_count += 1
+        # 清理一次缓存
+        if released_count > 0:
+            torch.cuda.empty_cache()
+        return released_count
+    
+    def get_num_batches(self):
+        """
+        获取当前总批次数（用于渲染阶段）
+        :return: 总批次数
+        """
+        total_cameras = len(self.getTrainCameras())
+        if self.batch_size and self.batch_size > 0:
+            return (total_cameras + self.batch_size - 1) // self.batch_size
+        return 1
+    
+    def getTrainCameras(self, batch_idx=None):
+        """
+        获取训练相机列表，支持按批次获取
+        :param batch_idx: 批次索引，如果为 None 则获取全部
+        :return: 相机对象列表
+        """
+        all_cams = []   
+        for scale in self.resolution_scales:
+            all_cams.extend(self.train_cameras[scale])
+        
+        if batch_idx is not None and self.batch_size and self.batch_size > 0:
+            start_idx = batch_idx * self.batch_size
+            end_idx = min(start_idx + self.batch_size, len(all_cams))
+            return all_cams[start_idx:end_idx]
+        
+        return all_cams
