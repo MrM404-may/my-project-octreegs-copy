@@ -21,8 +21,8 @@ os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in res
 os.system('echo $CUDA_VISIBLE_DEVICES')
 
 # ====================== 内存监控函数 ======================
-def monitor_memory(description):
-    """监控当前内存使用情况"""
+def monitor_memory():
+    """监控当前内存使用情况，返回内存使用信息"""
     import psutil
     import torch
     
@@ -39,10 +39,14 @@ def monitor_memory(description):
         gpu_used = torch.cuda.memory_allocated() / (1024**3)
         gpu_total = torch.cuda.get_device_properties(0).total_memory / (1024**3)
     
-    print(f"\n📊 [{description}]")
-    print(f"   CPU内存: {cpu_used:.2f}GB / {cpu_total:.2f}GB ({cpu_percent:.1f}%)")
-    if torch.cuda.is_available():
-        print(f"   GPU内存: {gpu_used:.2f}GB / {gpu_total:.2f}GB")
+    # 返回内存使用信息
+    return {
+        'cpu_used': cpu_used,
+        'cpu_total': cpu_total,
+        'cpu_percent': cpu_percent,
+        'gpu_used': gpu_used,
+        'gpu_total': gpu_total
+    }
 
 # 导入psutil库
 import psutil
@@ -569,14 +573,17 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
     progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "LocalIter": f"0/{current_region_total_iters}"})
     
     # 初始化时加载第一个区域的所有照片到GPU
-    monitor_memory("初始化前")
+    mem_info_before = monitor_memory()
     print(f"\n🔄 [Init] 加载区域 {current_region_idx+1} ({current_region['name']}) 的所有相机到GPU...")
+    print(f"   初始化前内存: CPU={mem_info_before['cpu_used']:.1f}/{mem_info_before['cpu_total']:.1f}GB, GPU={mem_info_before['gpu_used']:.1f}/{mem_info_before['gpu_total']:.1f}GB")
     scene.release_images()
     torch.cuda.empty_cache()
-    monitor_memory("释放内存后")
+    mem_info_after_release = monitor_memory()
+    print(f"   释放内存后: CPU={mem_info_after_release['cpu_used']:.1f}/{mem_info_after_release['cpu_total']:.1f}GB, GPU={mem_info_after_release['gpu_used']:.1f}/{mem_info_after_release['gpu_total']:.1f}GB")
     # 一次性加载当前区域的所有相机到GPU
     scene.load_cameras_by_ids(current_camera_pool)
-    monitor_memory("加载相机后")
+    mem_info_after_load = monitor_memory()
+    print(f"   加载相机后: CPU={mem_info_after_load['cpu_used']:.1f}/{mem_info_after_load['cpu_total']:.1f}GB, GPU={mem_info_after_load['gpu_used']:.1f}/{mem_info_after_load['gpu_total']:.1f}GB")
     print(f"✅ 区域 {current_region_idx+1} 所有相机已加载到GPU")
     # 训练循环
     for iteration in range(first_iter, TOTAL_TRAIN_ITER + 1):        
@@ -618,11 +625,13 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
                 gaussians.exit_and_cleanup()
                 
                 # 4. 释放上个区域的照片内存
-                monitor_memory(f"切换区域前 (区域 {prev_region_idx+1})")
+                mem_info_before = monitor_memory()
                 print(f"🔄 [Switch] 释放区域 {prev_region_idx+1} 的照片内存...")
+                print(f"   切换前内存: CPU={mem_info_before['cpu_used']:.1f}/{mem_info_before['cpu_total']:.1f}GB, GPU={mem_info_before['gpu_used']:.1f}/{mem_info_before['gpu_total']:.1f}GB")
                 scene.release_images()
                 torch.cuda.empty_cache()
-                monitor_memory(f"释放区域 {prev_region_idx+1} 内存后")
+                mem_info_after_release = monitor_memory()
+                print(f"   释放后内存: CPU={mem_info_after_release['cpu_used']:.1f}/{mem_info_after_release['cpu_total']:.1f}GB, GPU={mem_info_after_release['gpu_used']:.1f}/{mem_info_after_release['gpu_total']:.1f}GB")
                 print(f"✅ 区域 {prev_region_idx+1} 照片内存已释放")
         
                 # 5. 切换变量
@@ -642,7 +651,8 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
                 camera_sequence = generate_random_sequence(current_camera_pool)
                 print(f"🔄 [Switch] 加载区域 {current_region_idx+1} ({current_region['name']}) 的所有相机到GPU...")
                 scene.load_cameras_by_ids(current_camera_pool)
-                monitor_memory(f"加载区域 {current_region_idx+1} 后")
+                mem_info_after_load = monitor_memory()
+                print(f"   加载后内存: CPU={mem_info_after_load['cpu_used']:.1f}/{mem_info_after_load['cpu_total']:.1f}GB, GPU={mem_info_after_load['gpu_used']:.1f}/{mem_info_after_load['gpu_total']:.1f}GB")
                 print(f"✅ 区域 {current_region_idx+1} 所有相机已加载到GPU")
 
                 progress_bar.set_description(f"Training [Region {current_region_idx+1}: {current_region['name']}]")
@@ -718,11 +728,14 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
             ema_loss_for_log = 0.4 * loss.item() + 0.6 * ema_loss_for_log
 
             if iteration % 1000 == 0:
-                # 【修改】进度条增加本地迭代显示
+                # 【修改】进度条增加本地迭代显示和内存使用信息
+                mem_info = monitor_memory()
                 progress_bar.set_postfix({
                     "Loss": f"{ema_loss_for_log:.{7}f}",
                     "Region": f"{current_region_idx+1}({current_region['name']})",
-                    "LocalIter": f"{current_local_iter}/{current_region_total_iters}"
+                    "LocalIter": f"{current_local_iter}/{current_region_total_iters}",
+                    "CPU": f"{mem_info['cpu_used']:.1f}/{mem_info['cpu_total']:.1f}GB",
+                    "GPU": f"{mem_info['gpu_used']:.1f}/{mem_info['gpu_total']:.1f}GB"
                 })
                 progress_bar.update(1000)
             if iteration == TOTAL_TRAIN_ITER:
