@@ -542,9 +542,18 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
     scene.load_region_cameras(current_camera_pool)
     print(f"[Init] 第一个区域相机加载完成，共 {len(current_camera_pool)} 个相机")
     
-    # 生成第一个区域的随机训练序列
-    camera_sequence = generate_random_sequence(current_camera_pool)
-    sequence_index = 0
+    # 生成第一个区域的相机列表并打乱
+    def generate_camera_list(camera_pool):
+        """生成随机相机列表"""
+        camera_list = []
+        for camera_id in camera_pool:
+            if camera_id in scene.camera_id_map:
+                camera_list.append(scene.camera_id_map[camera_id])
+        random.shuffle(camera_list)
+        return camera_list
+    
+    # 生成第一个区域的相机列表
+    camera_list = generate_camera_list(current_camera_pool)
     
     # 训练循环
     for iteration in range(first_iter, TOTAL_TRAIN_ITER + 1):        
@@ -608,9 +617,8 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
                 scene.load_region_cameras(current_camera_pool)
                 print(f"[Region Switch] 新区域相机加载完成，共 {len(current_camera_pool)} 个相机")
                 
-                # 生成新区域的随机训练序列
-                camera_sequence = generate_random_sequence(current_camera_pool)
-                sequence_index = 0
+                # 生成新区域的相机列表
+                camera_list = generate_camera_list(current_camera_pool)
 
                 progress_bar.set_description(f"Training [Region {current_region_idx+1}: {current_region['name']}]")
                 progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "LocalIter": "0/{current_region['iterations']}", "Status": "Ready"})
@@ -639,16 +647,13 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
         background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
         
         # 【需求3】在区域训练时，无需反复加载和释放照片，数据操作就只在GPU上进行
-        # 从当前区域的相机池中随机选择一个相机
-        if sequence_index >= len(camera_sequence):
-            # 序列用完，重新生成
-            camera_sequence = generate_random_sequence(current_camera_pool)
-            sequence_index = 0
+        # 从相机列表中获取相机
+        if not camera_list:
+            # 列表用完，重新生成
+            camera_list = generate_camera_list(current_camera_pool)
         
-        # 获取相机ID并从映射中获取相机对象
-        camera_id = camera_sequence[sequence_index]
-        viewpoint_cam = scene.camera_id_map[camera_id]
-        sequence_index += 1
+        # 直接从列表中弹出相机对象
+        viewpoint_cam = camera_list.pop()
         
         # Render
         if (iteration - 1) == debug_from:
