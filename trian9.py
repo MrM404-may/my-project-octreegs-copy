@@ -408,9 +408,8 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
         dataset.add_opacity_dist, dataset.add_cov_dist, dataset.add_color_dist, dataset.add_level, 
         dataset.visible_threshold, dataset.dist2level, dataset.base_layer, dataset.progressive, dataset.extend
     )
-    # 添加batch_size参数，实现批量加载相机（100张/批）
-    batch_size = 1
-    scene = Scene(dataset, gaussians, ply_path=ply_path, shuffle=False, logger=logger, resolution_scales=dataset.resolution_scales, batch_size=batch_size)
+    # 初始化场景
+    scene = Scene(dataset, gaussians, ply_path=ply_path, shuffle=False, logger=logger, resolution_scales=dataset.resolution_scales)
     gaussians.training_setup(opt)
     gaussians.set_coarse_interval(opt.coarse_iter, opt.coarse_factor)
     if checkpoint:
@@ -522,13 +521,7 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
     # gaussians.restore_initial_state()
     gaussians.set_region(current_region_idx)  
     
-    # 初始化批量加载相机相关变量
-    batch_size = 100
-    current_batch_idx = 0
-    camera_sequence = []
-    current_batch_cameras = []
-    
-    # 生成第一个随机训练序列
+    # 生成随机训练序列
     def generate_random_sequence(camera_pool):
         """生成随机训练序列"""
         # camera_pool现在是相机ID列表，直接打乱它
@@ -540,21 +533,21 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
     current_camera_pool = REGION_CAMERA_POOLS[current_region_idx]
     # 生成随机训练序列
     camera_sequence = generate_random_sequence(current_camera_pool)
-    # 计算批次数
-    num_batches = (len(camera_sequence) + batch_size - 1) // batch_size
-    start_iter, end_iter = REGION_ITER_BOUNDS[current_region_idx]
-    print("region 1 start_iter, end_iter", start_iter, end_iter)
-    start_iter, end_iter = REGION_ITER_BOUNDS[current_region_idx+1]
-    print("region 2 start_iter, end_iter", start_iter, end_iter)
+    
     # ===============================================================================
 
     # 初始化进度条，使用当前区域的迭代次数作为总长度
     current_region_total_iters = current_region['iterations']
     progress_bar = tqdm(total=current_region_total_iters, desc=f"Training [Region {current_region_idx+1}: {current_region['name']}]", leave=True)
-    progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "Batches": num_batches, "LocalIter": f"0/{current_region_total_iters}"})
+    progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "LocalIter": f"0/{current_region_total_iters}"})
+    
+    # 初始化时加载第一个区域的所有照片到GPU
+    print(f"\n🔄 [Init] 加载区域 {current_region_idx+1} ({current_region['name']}) 的所有相机到GPU...")
     scene.release_images()
     torch.cuda.empty_cache()
-    current_batch_cameras_list = []
+    # 一次性加载当前区域的所有相机到GPU
+    scene.load_cameras_by_ids(current_camera_pool)
+    print(f"✅ 区域 {current_region_idx+1} 所有相机已加载到GPU")
     # 训练循环
     for iteration in range(first_iter, TOTAL_TRAIN_ITER + 1):        
         # network gui not available in octree-gs yet
@@ -593,29 +586,34 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
                 gaussians.clean_out_region(current_polygon, f"Region_{current_region_idx}")
                 gaussians.clean_in_region()
                 gaussians.exit_and_cleanup()
+                
+                # 4. 释放上个区域的照片内存
+                print(f"🔄 [Switch] 释放区域 {prev_region_idx+1} 的照片内存...")
+                scene.release_images()
+                torch.cuda.empty_cache()
+                print(f"✅ 区域 {prev_region_idx+1} 照片内存已释放")
         
-                # 2. 切换变量
+                # 5. 切换变量
                 current_region_idx = region_idx
                 current_region = REGIONS_CONFIG[current_region_idx]
                 current_polygon = Polygon(current_region['vertices'])
                 
-                # 3. 【核心】重置当前区域的本地迭代计数器
+                # 6. 【核心】重置当前区域的本地迭代计数器
                 REGION_LOCAL_ITERS[current_region_idx] = 0
                 
-                # 4. 进入新区域
+                # 7. 进入新区域
                 gaussians.enter_region(current_polygon)
-                gaussians.set_region(current_region_idx)        
+                gaussians.set_region(current_region_idx)
                 
-                # 重置批量加载相机相关变量
-                current_batch_idx = 0
+                # 8. 加载新区域的所有照片到GPU
                 current_camera_pool = REGION_CAMERA_POOLS[current_region_idx]
                 camera_sequence = generate_random_sequence(current_camera_pool)
-                num_batches = (len(camera_sequence) + batch_size - 1) // batch_size
-                current_batch_cameras = []
-                current_batch_cameras_list = []
+                print(f"🔄 [Switch] 加载区域 {current_region_idx+1} ({current_region['name']}) 的所有相机到GPU...")
+                scene.load_cameras_by_ids(current_camera_pool)
+                print(f"✅ 区域 {current_region_idx+1} 所有相机已加载到GPU")
 
                 progress_bar.set_description(f"Training [Region {current_region_idx+1}: {current_region['name']}]")
-                progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "Batches": num_batches, "LocalIter": "0/{current_region['iterations']}", "Status": "Ready"})
+                progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "LocalIter": "0/{current_region['iterations']}", "Status": "Ready"})
                 
                 progress_bar.set_description(f"Training [Region {current_region_idx+1}: {current_region['name']}]")
                 send_mail(f"switching from region {prev_region_idx} to {current_region_idx} at iteration {iteration}")
@@ -626,40 +624,6 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
         REGION_LOCAL_ITERS[current_region_idx] += 1
         current_local_iter = REGION_LOCAL_ITERS[current_region_idx]  # 获取当前区域的本地步数
         current_region_total_iters = current_region['iterations']    # 获取当前区域的总步数
-        # ===========================================================================
-
-        # ====================== 批量加载相机逻辑 ======================
-        # 检查是否需要加载新批次
-        if not current_batch_cameras_list:
-            if current_batch_idx < num_batches:
-                # 当批次用完时释放内存
-                scene.release_images()
-                torch.cuda.empty_cache()
-                # 加载下一个批次
-                start_idx = current_batch_idx * batch_size
-                end_idx = min(start_idx + batch_size, len(camera_sequence))
-                current_batch_cameras = camera_sequence[start_idx:end_idx]
-
-                progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "Batches": num_batches, "LocalIter": f"{current_local_iter}/{current_region['iterations']}", "Status": f"LoadBatch {current_batch_idx+1}/{num_batches}"})
-                # 根据相机ID加载相机
-                current_batch_cameras_list = scene.load_cameras_by_ids(current_batch_cameras)
-                current_batch_idx += 1
-            else:
-                # 当批次用完时释放内存
-                scene.release_images()
-                torch.cuda.empty_cache()
-                # 所有批次加载完毕，生成新的随机序列
-                camera_sequence = generate_random_sequence(current_camera_pool)
-                current_batch_idx = 0
-                num_batches = (len(camera_sequence) + batch_size - 1) // batch_size
-                # 加载第一个批次
-                start_idx = current_batch_idx * batch_size
-                end_idx = min(start_idx + batch_size, len(camera_sequence))
-                current_batch_cameras = camera_sequence[start_idx:end_idx]
-                progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "Batches": num_batches, "LocalIter": f"{current_local_iter}/{current_region['iterations']}", "Status": f"LoadBatch {current_batch_idx+1}/{num_batches}"})
-                # 根据相机ID加载相机
-                current_batch_cameras_list = scene.load_cameras_by_ids(current_batch_cameras)
-                current_batch_idx += 1
         # ===========================================================================
 
         iter_start.record()
@@ -674,12 +638,14 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
             bg_color = [0.0, 0.0, 0.0]
         background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
         
-  
- 
-        # 随机选择当前批次中的一个相机ID
-        # 直接从当前批次加载的相机中随机选择一个
-
-        viewpoint_cam = current_batch_cameras_list.pop()
+        # 随机选择当前区域中的一个相机
+        # 直接从当前区域的相机池中随机选择一个相机ID
+        if not camera_sequence:
+            # 当序列用完时，生成新的随机序列
+            camera_sequence = generate_random_sequence(current_camera_pool)
+        camera_id = camera_sequence.pop()
+        # 根据相机ID获取相机对象
+        viewpoint_cam = scene.get_camera_by_id(camera_id)
         
         # Render
         if (iteration - 1) == debug_from:
@@ -773,7 +739,7 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
             
             # 更新进度条
             current_region_total_iters = current_region['iterations']
-            progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "Batches": num_batches, "LocalIter": f"{current_local_iter}/{current_region_total_iters}", "Loss": f"{loss.item():.7f}"})
+            progress_bar.set_postfix({"Region": f"{current_region_idx+1}({current_region['name']})", "CamPool": len(current_camera_pool), "LocalIter": f"{current_local_iter}/{current_region_total_iters}", "Loss": f"{loss.item():.7f}"})
             # 确保进度条的当前值不超过总迭代次数
             if current_local_iter <= current_region_total_iters:
                 progress_bar.n = current_local_iter
@@ -936,7 +902,7 @@ def render_sets(dataset : ModelParams, iteration : int, pipeline : PipelineParam
             dataset.add_opacity_dist, dataset.add_cov_dist, dataset.add_color_dist, dataset.add_level, 
             dataset.visible_threshold, dataset.dist2level, dataset.base_layer, dataset.progressive, dataset.extend
         )
-        scene = Scene(dataset, gaussians, load_iteration=iteration, shuffle=False, resolution_scales=dataset.resolution_scales, batch_size=100, logger=logger)
+        scene = Scene(dataset, gaussians, load_iteration=iteration, shuffle=False, resolution_scales=dataset.resolution_scales, logger=logger)
         gaussians.eval()
 
         if dataset.random_background:
@@ -950,30 +916,15 @@ def render_sets(dataset : ModelParams, iteration : int, pipeline : PipelineParam
             os.makedirs(dataset.model_path)
 
         if not skip_train:
-            # 使用批量加载模式，每次只渲染一个批次的相机
-            num_batches = scene.get_num_batches()
-            total_visible_count = 0
-            total_time = 0
-            
-            for batch_idx in range(num_batches):
-                batch_cameras = scene.getTrainCameras(batch_idx)
-                if not batch_cameras:
-                    continue
-                
-                t_batch_list, batch_visible_count = render_set(dataset.model_path, "train", scene.loaded_iter, batch_cameras, gaussians, pipeline, background)
-                total_visible_count += sum(batch_visible_count)
-                total_time += sum(t_batch_list)
-                
-                # 释放内存
-                del batch_cameras
-                torch.cuda.empty_cache()
-            
-            if total_time > 0:
-                train_fps = len(scene.getTrainCameras()) / total_time
-                logger.info(f'Train FPS: \033[1;35m{train_fps:.5f}\033[0m')
-                if wandb is not None:
-                    wandb.log({"train_fps":train_fps, })
-            visible_count = total_visible_count
+            # 直接获取所有训练相机
+            train_cameras = scene.getTrainCameras()
+            if train_cameras:
+                t_train_list, visible_count = render_set(dataset.model_path, "train", scene.loaded_iter, train_cameras, gaussians, pipeline, background)
+                if t_train_list:
+                    train_fps = 1.0 / torch.tensor(t_train_list[5:]).mean()
+                    logger.info(f'Train FPS: \033[1;35m{train_fps.item():.5f}\033[0m')
+                    if wandb is not None:
+                        wandb.log({"train_fps":train_fps.item(), })
 
         if not skip_test:
             # 渲染测试相机（如果有的话）

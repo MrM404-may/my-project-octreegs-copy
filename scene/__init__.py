@@ -215,3 +215,42 @@ class Scene:
         if released_count > 0:
             torch.cuda.empty_cache()
         return released_count
+    
+    def get_camera_by_id(self, camera_id):
+        """根据相机ID获取相机对象"""
+        # 检查训练相机
+        for scale in self.resolution_scales:
+            if scale in self.train_cameras:
+                for cam in self.train_cameras[scale]:
+                    if cam.uid == camera_id:
+                        return cam
+        # 检查测试相机
+        for scale in self.resolution_scales:
+            if scale in self.test_cameras:
+                for cam in self.test_cameras[scale]:
+                    if cam.uid == camera_id:
+                        return cam
+        return None
+    
+    def load_cameras_by_ids(self, camera_ids):
+        """加载多个相机到GPU"""
+        loaded_cameras = []
+        for camera_id in camera_ids:
+            cam = self.get_camera_by_id(camera_id)
+            if cam:
+                if hasattr(cam, 'is_image_loaded') and not cam.is_image_loaded():
+                    if hasattr(cam, 'reload_image'):
+                        cam.reload_image()
+                loaded_cameras.append(cam)
+        return loaded_cameras
+    
+    def release_images(self):
+        """释放所有相机的GPU内存"""
+        self.releaseAllTrainCamerasMemory()
+        # 也释放测试相机的内存
+        for scale in self.resolution_scales:
+            if scale in self.test_cameras:
+                for cam in self.test_cameras[scale]:
+                    if hasattr(cam, 'release_image_from_gpu'):
+                        cam.release_image_from_gpu()
+        torch.cuda.empty_cache()
