@@ -57,7 +57,8 @@ namespace sibr {
 		 * \param render_h rendering height
 		 */
 		GaussianView(const sibr::BasicIBRScene::Ptr& ibrScene, uint render_w, uint render_h, std::string plyPath, bool* message_read, int fork, bool white_bg = false, bool useInterop = true, int device = 0,
-			int appearance_id = 0, bool add_opacity_dist = true, bool add_cov_dist = true, bool add_color_dist = true);
+			int appearance_id = 0, bool add_opacity_dist = true, bool add_cov_dist = true, bool add_color_dist = true,
+			bool use_region_mlp = false, std::string regionCameraJsonPath = "", int num_regions = 0);
 
 		/** Replace the current scene.
 		 *\param newScene the new scene to render */
@@ -175,6 +176,47 @@ namespace sibr {
 		PointBasedRenderer::Ptr _pointbasedrenderer;
 		BufferCopyRenderer* _copyRenderer;
 		GaussianSurfaceRenderer* _gaussianRenderer;
+		
+		// 区域相关的成员变量
+		bool _use_region_mlp = false;
+		int _current_region_id = 0;
+		int _num_regions = 0;
+		
+		// 区域相机信息数据结构
+		struct RegionCameraInfo {
+			int camera_id;
+			sibr::Vector3f position;
+			sibr::Matrix3f rotation;
+			std::string img_name;
+			std::map<std::string, bool> in_regions;
+		};
+		std::vector<RegionCameraInfo> _region_camera_infos;
+		std::map<std::string, int> _region_name_to_id;
+		
+		// 区域MLP管理
+		struct RegionMLP {
+			torch::jit::script::Module opacity_mlp_module;
+			torch::jit::script::Module color_mlp_module;
+			torch::jit::script::Module cov_mlp_module;
+			torch::jit::script::Module appearance_module;
+			bool has_appearance = false;
+		};
+		std::vector<RegionMLP> _region_mlps;
+		
+		// 当前激活的MLP指针
+		torch::jit::script::Module* _current_opacity_mlp = nullptr;
+		torch::jit::script::Module* _current_color_mlp = nullptr;
+		torch::jit::script::Module* _current_cov_mlp = nullptr;
+		torch::jit::script::Module* _current_appearance_mlp = nullptr;
+		
+		// Anchor的区域信息
+		std::vector<int> _anchor_region;
+		
+		// 函数声明
+		void loadRegionMLPs(const std::string& basePath, int numRegions);
+		void loadRegionCameraInfo(const std::string& jsonPath);
+		int determineRegionForViewpoint(const sibr::Camera& eye);
+		void activateRegionMLP(int regionId);
 	};
 
 } /*namespace sibr*/

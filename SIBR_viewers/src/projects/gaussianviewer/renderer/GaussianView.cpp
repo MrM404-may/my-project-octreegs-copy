@@ -16,6 +16,10 @@
 #include <boost/asio.hpp>
 #include <rasterizer.h>
 #include <fstream> 
+#include <map>
+#include <limits>
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 #include <imgui_internal.h>
 
 
@@ -34,6 +38,7 @@ struct AnchorPoint
 	float opacity;
 	float scale[6];
 	float rot[4];
+	float region; // 新增：区域ID
 };
 
 
@@ -108,7 +113,8 @@ int loadPly(const char* filename,
 	float& standard_dist,
 	int& levels,
 	sibr::Vector3f& minn,
-	sibr::Vector3f& maxx)
+	sibr::Vector3f& maxx,
+	std::vector<int>& anchor_region) // 新增参数：anchor区域信息
 {
 	std::ifstream infile(filename, std::ios_base::binary);
 
@@ -148,6 +154,7 @@ int loadPly(const char* filename,
 	scale2.resize(count * 3);
 	rot.resize(count * 4);
 	gs_pos.resize(count * 30);
+	anchor_region.resize(count); // 新增：调整区域向量大小
 	voxel_size = points[0].info;
 	standard_dist = points[1].info;
 
@@ -218,6 +225,8 @@ int loadPly(const char* filename,
 			offset[30 * k + j] = points[i].offset[(j % 3) * 10 + (j / 3)];
 			gs_pos[30 * k + j] = pos[3 * k + (j % 3)] + scale1[3 * k + (j % 3)] * offset[30 * k + j];
 		}
+		// 新增：保存anchor的区域信息
+		anchor_region[k] = int(points[i].region);
 	}
 	levels = max_level - min_level + 1;
 	return count;
@@ -419,14 +428,18 @@ std::function<char* (size_t N)> resizeFunctional(void** ptr, size_t& S) {
 	return lambda;
 }
 
-sibr::GaussianView::GaussianView(const sibr::BasicIBRScene::Ptr& ibrScene, uint render_w, uint render_h, std::string plyPath, bool* messageRead, int fork, bool white_bg, bool useInterop, int device, int appearance_id, bool add_opacity_dist, bool add_cov_dist, bool add_color_dist) :
+sibr::GaussianView::GaussianView(const sibr::BasicIBRScene::Ptr& ibrScene, uint render_w, uint render_h, std::string plyPath, bool* message_read, int fork, bool white_bg, bool useInterop, int device,
+	int appearance_id, bool add_opacity_dist, bool add_cov_dist, bool add_color_dist,
+	bool use_region_mlp, std::string regionCameraJsonPath, int num_regions) :
 	_scene(ibrScene),
-	_dontshow(messageRead),
+	_dontshow(message_read),
 	_fork(fork),
 	_appearance_id(appearance_id),
 	_add_opacity_dist(add_opacity_dist),
 	_add_cov_dist(add_cov_dist),
 	_add_color_dist(add_color_dist),
+	_use_region_mlp(use_region_mlp),
+	_num_regions(num_regions),
 	_libtorch_device(torch::kCUDA),
 	sibr::ViewBase(render_w, render_h)
 {
@@ -463,33 +476,48 @@ sibr::GaussianView::GaussianView(const sibr::BasicIBRScene::Ptr& ibrScene, uint 
 	}
 	_scene->cameras()->debugFlagCameraAsUsed(imgs_ulr);
 
-	// ��ȡfile���ļ������� file��const char*
+	// 获取file的文件夹名， file是const char*
 	std::string ply_path = plyPath + "point_cloud.ply";
-	std::string opacity_mlp_path = plyPath + "opacity_mlp.pt";
-	std::string cov_mlp_path = plyPath + "cov_mlp.pt";
-	std::string color_mlp_path = plyPath + "color_mlp.pt";
-	std::string appearance_path = plyPath + "embedding_appearance.pt";
-	SIBR_LOG << "Loading models from: " << plyPath << std::endl;
-	SIBR_LOG << "opacity_mlp : " << isFileExists_fopen(opacity_mlp_path) << std::endl;
-	SIBR_LOG << "cov_mlp : " << isFileExists_fopen(cov_mlp_path) << std::endl;
-	SIBR_LOG << "color_mlp : " << isFileExists_fopen(color_mlp_path) << std::endl;
-	SIBR_LOG << "embedding_appearance : " << isFileExists_fopen(appearance_path) << std::endl;
-	opacity_mlp_module = torch::jit::load(opacity_mlp_path, _libtorch_device);
-	color_mlp_module = torch::jit::load(color_mlp_path, _libtorch_device);
-	cov_mlp_module = torch::jit::load(cov_mlp_path, _libtorch_device);
-	if (isFileExists_fopen(appearance_path))
+	
+	if (_use_region_mlp)
 	{
-		appearance_module = torch::jit::load(appearance_path, _libtorch_device);
-		SIBR_LOG << "appearance code id : " << _appearance_id << std::endl;
-		_add_appearance = true;
+		SIBR_LOG << "Loading region-based MLP models from: " << plyPath << std::endl;
+		// 加载区域相机信息
+		if (!regionCameraJsonPath.empty())
+		{
+			loadRegionCameraInfo(regionCameraJsonPath);
+		}
+		// 加载区域MLP
+		loadRegionMLPs(plyPath, _num_regions);
 	}
 	else
 	{
-		_add_appearance = false;
+		std::string opacity_mlp_path = plyPath + "opacity_mlp.pt";
+		std::string cov_mlp_path = plyPath + "cov_mlp.pt";
+		std::string color_mlp_path = plyPath + "color_mlp.pt";
+		std::string appearance_path = plyPath + "embedding_appearance.pt";
+		SIBR_LOG << "Loading global models from: " << plyPath << std::endl;
+		SIBR_LOG << "opacity_mlp : " << isFileExists_fopen(opacity_mlp_path) << std::endl;
+		SIBR_LOG << "cov_mlp : " << isFileExists_fopen(cov_mlp_path) << std::endl;
+		SIBR_LOG << "color_mlp : " << isFileExists_fopen(color_mlp_path) << std::endl;
+		SIBR_LOG << "embedding_appearance : " << isFileExists_fopen(appearance_path) << std::endl;
+		opacity_mlp_module = torch::jit::load(opacity_mlp_path, _libtorch_device);
+		color_mlp_module = torch::jit::load(color_mlp_path, _libtorch_device);
+		cov_mlp_module = torch::jit::load(cov_mlp_path, _libtorch_device);
+		if (isFileExists_fopen(appearance_path))
+		{
+			appearance_module = torch::jit::load(appearance_path, _libtorch_device);
+			SIBR_LOG << "appearance code id : " << _appearance_id << std::endl;
+			_add_appearance = true;
+		}
+		else
+		{
+			_add_appearance = false;
+		}
 	}
 
 	// Load the PLY data (AoS) to the GPU (SoA)
-	count = loadPly(ply_path.c_str(), anchor_pos, anchor_level, anchor_extra_level, anchor_offset, anchor_feature, anchor_opacity, anchor_scale_1, anchor_scale_2, anchor_rotation, gaussian_pos, voxel_size, standard_dist, levels, _scenemax, _scenemin);
+	count = loadPly(ply_path.c_str(), anchor_pos, anchor_level, anchor_extra_level, anchor_offset, anchor_feature, anchor_opacity, anchor_scale_1, anchor_scale_2, anchor_rotation, gaussian_pos, voxel_size, standard_dist, levels, _scenemax, _scenemin, _anchor_region);
 	ak_pos_all = torch::from_blob(anchor_pos.data(), { count , 3 }, torch::kFloat32).to(_libtorch_device);
 	ak_level_all = torch::from_blob(anchor_level.data(), { count , 1 }, torch::kInt).to(_libtorch_device);
 	ak_extra_level_all = torch::from_blob(anchor_extra_level.data(), { count, 1 }, torch::kFloat32).to(_libtorch_device);	gs_pos_all = torch::from_blob(gaussian_pos.data(), { count, 30 }, torch::kFloat32).to(_libtorch_device);
@@ -566,6 +594,13 @@ void sibr::GaussianView::onRenderIBR(sibr::IRenderTarget& dst, sibr::Camera& eye
 	}
 	else
 	{
+		// 如果使用区域MLP，先判断当前视角所属区域并激活对应的MLP
+		if (_use_region_mlp)
+		{
+			int regionId = determineRegionForViewpoint(eye);
+			activateRegionMLP(regionId);
+		}
+		
 		// Convert view and projection to target coordinate system
 		auto view_mat = eye.view();
 		auto proj_mat = eye.viewproj();
@@ -660,20 +695,40 @@ void sibr::GaussianView::onRenderIBR(sibr::IRenderTarget& dst, sibr::Camera& eye
 
 		torch::NoGradGuard no_grad;
 		torch::Tensor neural_opacity;
-		if (_add_opacity_dist)
-			neural_opacity = opacity_mlp_module.forward({ cat_local_view }).toTensor().to(_libtorch_device);
+		if (_use_region_mlp)
+		{
+			if (_add_opacity_dist)
+				neural_opacity = _current_opacity_mlp->forward({ cat_local_view }).toTensor().to(_libtorch_device);
+			else
+				neural_opacity = _current_opacity_mlp->forward({ cat_local_view_wodist }).toTensor().to(_libtorch_device);
+		}
 		else
-			neural_opacity = opacity_mlp_module.forward({ cat_local_view_wodist }).toTensor().to(_libtorch_device);
+		{
+			if (_add_opacity_dist)
+				neural_opacity = opacity_mlp_module.forward({ cat_local_view }).toTensor().to(_libtorch_device);
+			else
+				neural_opacity = opacity_mlp_module.forward({ cat_local_view_wodist }).toTensor().to(_libtorch_device);
+		}
 		
 		neural_opacity.index_put_({ transition_mask }, neural_opacity.index({ transition_mask }) * dec_level.index({ transition_mask }));
 		neural_opacity = neural_opacity.reshape({ -1, 1 });
 		torch::Tensor mask = (neural_opacity > 0.005).view({ -1 }).to(_libtorch_device);
 
 		torch::Tensor scale_rot;
-		if(_add_cov_dist)
-			scale_rot = cov_mlp_module.forward({ cat_local_view }).toTensor().to(_libtorch_device);
+		if (_use_region_mlp)
+		{
+			if(_add_cov_dist)
+				scale_rot = _current_cov_mlp->forward({ cat_local_view }).toTensor().to(_libtorch_device);
+			else
+				scale_rot = _current_cov_mlp->forward({ cat_local_view_wodist }).toTensor().to(_libtorch_device);
+		}
 		else
-			scale_rot = cov_mlp_module.forward({ cat_local_view_wodist }).toTensor().to(_libtorch_device);
+		{
+			if(_add_cov_dist)
+				scale_rot = cov_mlp_module.forward({ cat_local_view }).toTensor().to(_libtorch_device);
+			else
+				scale_rot = cov_mlp_module.forward({ cat_local_view_wodist }).toTensor().to(_libtorch_device);
+		}
 		scale_rot = scale_rot.reshape({ M * 10, 7 });
 
 		torch::Tensor gs_color, ak_color;
@@ -698,31 +753,64 @@ void sibr::GaussianView::onRenderIBR(sibr::IRenderTarget& dst, sibr::Camera& eye
 		}
 		else
 		{
-			if (_add_appearance)
+			if (_use_region_mlp)
 			{
-				torch::Tensor camera_indices = torch::ones({ M }, torch::kLong).to(_libtorch_device);
-				camera_indices = camera_indices * _appearance_id;
-				torch::Tensor appearance = appearance_module.forward({ camera_indices }).toTensor().to(_libtorch_device);
-				if (_add_color_dist)
+				if (_current_appearance_mlp != nullptr)
 				{
-					cat_local_view = torch::cat({ cat_local_view, appearance }, 1).to(_libtorch_device);
-					gs_color = color_mlp_module.forward({ cat_local_view }).toTensor().to(_libtorch_device);
+					torch::Tensor camera_indices = torch::ones({ M }, torch::kLong).to(_libtorch_device);
+					camera_indices = camera_indices * _appearance_id;
+					torch::Tensor appearance = _current_appearance_mlp->forward({ camera_indices }).toTensor().to(_libtorch_device);
+					if (_add_color_dist)
+					{
+						cat_local_view = torch::cat({ cat_local_view, appearance }, 1).to(_libtorch_device);
+						gs_color = _current_color_mlp->forward({ cat_local_view }).toTensor().to(_libtorch_device);
+					}
+					else
+					{
+						cat_local_view_wodist = torch::cat({ cat_local_view_wodist, appearance }, 1).to(_libtorch_device);
+						gs_color = _current_color_mlp->forward({ cat_local_view_wodist }).toTensor().to(_libtorch_device);
+					}
 				}
 				else
 				{
-					cat_local_view_wodist = torch::cat({ cat_local_view_wodist, appearance }, 1).to(_libtorch_device);
-					gs_color = color_mlp_module.forward({ cat_local_view_wodist }).toTensor().to(_libtorch_device);
+					if (_add_color_dist)
+					{
+						gs_color = _current_color_mlp->forward({ cat_local_view }).toTensor().to(_libtorch_device);
+					}
+					else
+					{
+						gs_color = _current_color_mlp->forward({ cat_local_view_wodist }).toTensor().to(_libtorch_device);
+					}
 				}
 			}
 			else
 			{
-				if (_add_color_dist)
+				if (_add_appearance)
 				{
-					gs_color = color_mlp_module.forward({ cat_local_view }).toTensor().to(_libtorch_device);
+					torch::Tensor camera_indices = torch::ones({ M }, torch::kLong).to(_libtorch_device);
+					camera_indices = camera_indices * _appearance_id;
+					torch::Tensor appearance = appearance_module.forward({ camera_indices }).toTensor().to(_libtorch_device);
+					if (_add_color_dist)
+					{
+						cat_local_view = torch::cat({ cat_local_view, appearance }, 1).to(_libtorch_device);
+						gs_color = color_mlp_module.forward({ cat_local_view }).toTensor().to(_libtorch_device);
+					}
+					else
+					{
+						cat_local_view_wodist = torch::cat({ cat_local_view_wodist, appearance }, 1).to(_libtorch_device);
+						gs_color = color_mlp_module.forward({ cat_local_view_wodist }).toTensor().to(_libtorch_device);
+					}
 				}
 				else
 				{
-					gs_color = color_mlp_module.forward({ cat_local_view_wodist }).toTensor().to(_libtorch_device);
+					if (_add_color_dist)
+					{
+						gs_color = color_mlp_module.forward({ cat_local_view }).toTensor().to(_libtorch_device);
+					}
+					else
+					{
+						gs_color = color_mlp_module.forward({ cat_local_view_wodist }).toTensor().to(_libtorch_device);
+					}
 				}
 			}
 		}
@@ -875,6 +963,33 @@ void sibr::GaussianView::onGUI()
 				currMode = "LOD Bias";
 			ImGui::EndCombo();
 		}
+		
+		// 区域渲染相关选项
+		if (_use_region_mlp)
+		{
+			ImGui::Separator();
+			ImGui::Text("Region Rendering");
+			
+			// 显示当前区域
+			ImGui::Text("Current Region: %d", _current_region_id);
+			
+			// 自动/手动切换区域
+			static bool autoRegion = true;
+			if (ImGui::Checkbox("Auto Determine Region", &autoRegion))
+			{
+				// 如果关闭自动，保持当前区域
+			}
+			
+			// 手动选择区域
+			if (!autoRegion)
+			{
+				int regionCount = _region_mlps.size();
+				if (ImGui::SliderInt("Select Region", &_current_region_id, 0, regionCount - 1))
+				{
+					activateRegionMLP(_current_region_id);
+				}
+			}
+		}
 	}
 
 	if (currMode!="Initial Points"&& currMode != "Gaussian Points")
@@ -966,4 +1081,204 @@ sibr::GaussianView::~GaussianView()
 		cudaFree(imgPtr);
 
 	delete _copyRenderer;
+}
+
+// 加载区域MLP函数实现
+void sibr::GaussianView::loadRegionMLPs(const std::string& basePath, int numRegions)
+{
+	SIBR_LOG << "Loading " << numRegions << " region MLP models..." << std::endl;
+	
+	_region_mlps.resize(numRegions);
+	
+	for (int regionId = 0; regionId < numRegions; regionId++)
+	{
+		std::string opacity_path = basePath + "opacity_mlp_" + std::to_string(regionId) + ".pt";
+		std::string cov_path = basePath + "cov_mlp_" + std::to_string(regionId) + ".pt";
+		std::string color_path = basePath + "color_mlp_" + std::to_string(regionId) + ".pt";
+		std::string appearance_path = basePath + "embedding_appearance_" + std::to_string(regionId) + ".pt";
+		
+		try
+		{
+			SIBR_LOG << "Loading MLP for region " << regionId << "..." << std::endl;
+			_region_mlps[regionId].opacity_mlp_module = torch::jit::load(opacity_path, _libtorch_device);
+			_region_mlps[regionId].color_mlp_module = torch::jit::load(color_path, _libtorch_device);
+			_region_mlps[regionId].cov_mlp_module = torch::jit::load(cov_path, _libtorch_device);
+			
+			if (isFileExists_fopen(appearance_path))
+			{
+				_region_mlps[regionId].appearance_module = torch::jit::load(appearance_path, _libtorch_device);
+				_region_mlps[regionId].has_appearance = true;
+				SIBR_LOG << "  - appearance model for region " << regionId << " loaded" << std::endl;
+			}
+			else
+			{
+				_region_mlps[regionId].has_appearance = false;
+			}
+			
+			SIBR_LOG << "Region " << regionId << " MLP loaded successfully" << std::endl;
+		}
+		catch (const std::exception& e)
+		{
+			SIBR_ERR << "Failed to load MLP for region " << regionId << ": " << e.what() << std::endl;
+		}
+	}
+	
+	// 默认激活第一个区域的MLP
+	if (numRegions > 0)
+	{
+		activateRegionMLP(0);
+	}
+}
+
+// 加载区域相机信息JSON
+void sibr::GaussianView::loadRegionCameraInfo(const std::string& jsonPath)
+{
+	SIBR_LOG << "Loading region camera info from: " << jsonPath << std::endl;
+	
+	try
+	{
+		std::ifstream jsonFile(jsonPath);
+		if (!jsonFile.is_open())
+		{
+			SIBR_ERR << "Failed to open region camera JSON file" << std::endl;
+			return;
+		}
+		
+		json j;
+		jsonFile >> j;
+		
+		// 遍历相机
+		for (auto& [cameraIdStr, cameraData] : j.items())
+		{
+			RegionCameraInfo info;
+			info.camera_id = std::stoi(cameraIdStr);
+			
+			// 读取位置
+			auto& posData = cameraData["position"];
+			info.position = sibr::Vector3f(
+				posData[0],
+				posData[1],
+				posData[2]
+			);
+			
+			// 读取旋转
+			auto& rotData = cameraData["rotation"];
+			info.rotation = sibr::Matrix3f();
+			for (int i = 0; i < 3; i++)
+			{
+				for (int j = 0; j < 3; j++)
+				{
+					info.rotation(i, j) = rotData[i][j];
+				}
+			}
+			
+			// 读取图片名
+			info.img_name = cameraData["img_name"];
+			
+			// 读取区域信息
+			auto& inRegionsData = cameraData["in_regions"];
+			for (auto& [regionName, isInRegion] : inRegionsData.items())
+			{
+				info.in_regions[regionName] = isInRegion;
+				
+				// 建立区域名称到ID的映射
+				if (_region_name_to_id.find(regionName) == _region_name_to_id.end())
+				{
+					int newId = _region_name_to_id.size();
+					_region_name_to_id[regionName] = newId;
+				}
+			}
+			
+			_region_camera_infos.push_back(info);
+		}
+		
+		SIBR_LOG << "Loaded camera info for " << _region_camera_infos.size() << " cameras, "
+				 << _region_name_to_id.size() << " regions defined" << std::endl;
+	}
+	catch (const std::exception& e)
+	{
+		SIBR_ERR << "Error parsing region camera JSON: " << e.what() << std::endl;
+	}
+}
+
+// 判断新视角所属的区域
+int sibr::GaussianView::determineRegionForViewpoint(const sibr::Camera& eye)
+{
+	if (_region_camera_infos.empty())
+	{
+		return 0; // 默认返回第一个区域
+	}
+	
+	// 计算新视角与每个训练相机的相似性
+	std::map<int, float> regionScores;
+	
+	for (const auto& camInfo : _region_camera_infos)
+	{
+		// 计算位置距离
+		float posDist = (eye.position() - camInfo.position).norm();
+		
+		// 计算旋转相似性（考虑视角方向）
+		sibr::Vector3f eyeDir = eye.front();
+		sibr::Vector3f camDir = camInfo.rotation * sibr::Vector3f(0, 0, -1);
+		float dirSimilarity = eyeDir.dot(camDir);
+		
+		// 组合相似性得分（距离越小，方向越一致，得分越高）
+		float score = dirSimilarity / (posDist + 0.01f);
+		
+		// 将得分加到该相机所属的区域
+		for (const auto& [regionName, isInRegion] : camInfo.in_regions)
+		{
+			if (isInRegion)
+			{
+				int regionId = _region_name_to_id[regionName];
+				regionScores[regionId] += score;
+			}
+		}
+	}
+	
+	// 找到得分最高的区域
+	int bestRegionId = 0;
+	float bestScore = -std::numeric_limits<float>::max();
+	
+	for (const auto& [regionId, score] : regionScores)
+	{
+		if (score > bestScore)
+		{
+			bestScore = score;
+			bestRegionId = regionId;
+		}
+	}
+	
+	SIBR_LOG << "Determined region " << bestRegionId << " for new viewpoint (score: " << bestScore << ")" << std::endl;
+	
+	return bestRegionId;
+}
+
+// 激活指定区域的MLP
+void sibr::GaussianView::activateRegionMLP(int regionId)
+{
+	if (regionId < 0 || regionId >= _region_mlps.size())
+	{
+		SIBR_ERR << "Invalid region ID: " << regionId << std::endl;
+		return;
+	}
+	
+	if (_current_region_id != regionId)
+	{
+		SIBR_LOG << "Activating MLP for region " << regionId << std::endl;
+		
+		_current_region_id = regionId;
+		_current_opacity_mlp = &_region_mlps[regionId].opacity_mlp_module;
+		_current_color_mlp = &_region_mlps[regionId].color_mlp_module;
+		_current_cov_mlp = &_region_mlps[regionId].cov_mlp_module;
+		
+		if (_region_mlps[regionId].has_appearance)
+		{
+			_current_appearance_mlp = &_region_mlps[regionId].appearance_module;
+		}
+		else
+		{
+			_current_appearance_mlp = nullptr;
+		}
+	}
 }

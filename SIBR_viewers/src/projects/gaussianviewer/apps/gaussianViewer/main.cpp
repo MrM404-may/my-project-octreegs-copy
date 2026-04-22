@@ -240,7 +240,8 @@ int main(int ac, char** av)
 
 	// Create the ULR view.
 	GaussianView::Ptr gaussianView(new GaussianView(scene, sceneResWidth, sceneResHeight, plyPath, &messageRead, fork, white_background, !myArgs.noInterop, device,
-													myArgs.appearance_id, add_opacity_dist, add_cov_dist, add_color_dist));
+													myArgs.appearance_id, add_opacity_dist, add_cov_dist, add_color_dist,
+													myArgs.useRegionMLP, myArgs.regionCameraJsonPath, myArgs.numRegions));
 
 	// Raycaster.
 	std::shared_ptr<sibr::Raycaster> raycaster = std::make_shared<sibr::Raycaster>();

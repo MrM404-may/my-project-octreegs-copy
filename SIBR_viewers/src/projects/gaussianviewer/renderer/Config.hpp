@@ -49,6 +49,10 @@ namespace sibr {
 		Arg<int> device = {"device", 0, "CUDA device index"};
 		Arg<bool> loadImages = { "load_images", "Whether or not to load images for scene overview."};
 		Arg<bool> noInterop = { "no_interop", "Don't try to use interop (may be required for unconventional OpenGL setups, like WSL)" };
+		Arg<int> appearance_id = { "appearance_id", 0, "Appearance code id" };
+		Arg<bool> useRegionMLP = { "use_region_mlp", false, "Use region-based MLP models" };
+		Arg<std::string> regionCameraJsonPath = { "region_camera_json", "", "Path to JSON file containing region camera info" };
+		Arg<int> numRegions = { "num_regions", 0, "Number of regions" };
 	};
 
 }
