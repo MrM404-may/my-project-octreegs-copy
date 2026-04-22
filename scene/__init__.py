@@ -271,3 +271,14 @@ class Scene:
                 for cam in self.test_cameras[scale]:
                     cam.release_image_from_gpu()
         torch.cuda.empty_cache()
+
+    def get_unloaded_cameras(self, camera_ids):
+        """输入一系列相机ID，返回没有加载图像的相机对象列表"""
+        unloaded_cameras = []
+        for camera_id in camera_ids:
+            if camera_id in self.camera_id_map:
+                cam = self.camera_id_map[camera_id]
+                # 检查相机图像是否已加载
+                if hasattr(cam, 'is_image_loaded') and not cam.is_image_loaded():
+                    unloaded_cameras.append(cam)
+        return unloaded_cameras
